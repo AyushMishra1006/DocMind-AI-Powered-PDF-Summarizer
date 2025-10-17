@@ -7,13 +7,13 @@ PyMuPDF==1.22.5
 
 # Utilities
 shutilwhich==1.1.0
-rich==13.4.2
-markdown-it-py==2.2.0
-pygments==2.19.2
-mdurl==0.1.2
+rich>=10.14.0,<14
+markdown-it-py>=4.0.0,<5
+pygments>=2.13.0,<3
+mdurl~=0.1
 
 # ML / embeddings
-langchain==0.0.262
+langchain==0.3.27
 langchain-community==0.0.38
 sentence-transformers==2.2.2
 torch==2.9.0
@@ -21,12 +21,12 @@ chromadb==0.4.9
 tqdm==4.66.1
 
 # API / Google
-google-generativeai==0.8.5
-requests==2.32.0
+google-generativeai>=0.8.5
+requests>=2.32.0
 
 # Data handling
-numpy==1.24.4
-pandas==2.0.3
-pyyaml==6.0
-sqlalchemy==2.0.44
-protobuf==4.25.8
+numpy>=1.24.0,<2
+pandas>=2.0.0,<3
+pyyaml>=6.0
+sqlalchemy>=2.0.0,<3
+protobuf>=4.25.8,<5
