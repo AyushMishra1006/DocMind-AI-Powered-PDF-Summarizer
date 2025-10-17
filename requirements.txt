@@ -1,26 +1,32 @@
-# Streamlit
+# Streamlit for the web app
 streamlit==1.29.0
 
-# PDF & text extraction
+# PDF processing
 pdfplumber==0.10.1
 PyMuPDF==1.22.5
 
-# Utilities
-rich>=10.14.0,<14
-markdown-it-py>=4.0.0,<5
-pygments>=2.19.0,<3
-mdurl~=0.1
-
-# ML / embeddings
+# LangChain (latest compatible with Python 3.13)
 langchain==0.3.25
-langchain-community==0.0.38
+# Remove langchain-community to avoid conflicts
+
+# Embeddings & NLP
 sentence-transformers==2.2.2
 torch==2.9.0
-chromadb==0.4.9
-tqdm==4.66.1
 
-# API / Google
+# Vector database
+chromadb==0.4.9
+
+# Utilities
+tqdm==4.66.1
+rich==14.2.0
+markdown-it-py==4.0.0
+pygments==2.19.2
+mdurl==0.1.2
+
+# Google Generative AI API
 google-generativeai>=0.8.5
+
+# HTTP requests
 requests>=2.32.0
 
 # Data handling
