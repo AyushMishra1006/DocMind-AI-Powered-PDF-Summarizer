@@ -6,10 +6,9 @@ pdfplumber==0.10.1
 PyMuPDF==1.22.5
 
 # Utilities
-shutilwhich==1.1.0
-rich>=10.14.0,<14
+rich>=14.0.0,<15
 markdown-it-py>=4.0.0,<5
-pygments>=2.13.0,<3
+pygments>=2.19.0,<3
 mdurl~=0.1
 
 # ML / embeddings
