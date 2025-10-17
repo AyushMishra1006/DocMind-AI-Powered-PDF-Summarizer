@@ -1,6 +1,9 @@
 streamlit
-PyMuPDF
+google-generativeai
+langchain
 langchain-community
 chromadb
 sentence-transformers
-google-generativeai
+faiss-cpu
+PyMuPDF
+tqdm
