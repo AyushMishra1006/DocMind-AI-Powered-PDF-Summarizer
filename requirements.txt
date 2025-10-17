@@ -1,10 +1,35 @@
+# Core web framework
 streamlit==1.29.0
+
+# PDF handling
 pdfplumber==0.10.1
-langchain==0.1.0
-langchain-community==0.0.5
+shutilwhich==1.1.0
+
+# LangChain and dependencies
+langchain>=0.1.0
+langchain-community>=0.0.9,<0.1
+
+# Embeddings and ML
+sentence-transformers>=2.2.2
+torch>=2.0.0
+
+# Vector database
 chromadb==0.4.9
-sentence-transformers==2.2.2
-torch==2.1.0+cpu
-google-generativeai==0.1.0
-tqdm==4.66.1
--f https://download.pytorch.org/whl/cpu/torch_stable.html
+
+# Google Generative AI integration (if using LLM APIs)
+google-generativeai>=0.1.0
+
+# Utilities
+tqdm>=4.66.1
+numpy>=1.24.0
+pandas>=2.0.3
+pyyaml>=6.0
+sqlalchemy>=2.0.44
+requests>=2.32.0
+protobuf>=4.25.8
+
+# Optional/for better logging & display
+rich>=14.2.0
+markdown-it-py>=4.0.0
+pygments>=2.19.2
+mdurl>=0.1.2
