@@ -7,13 +7,13 @@ PyMuPDF==1.22.5
 
 # Utilities
 shutilwhich==1.1.0
-rich==14.0.0
+rich==13.4.2
 markdown-it-py==2.2.0
 pygments==2.19.2
 mdurl==0.1.2
 
 # ML / embeddings
-langchain==0.3.27
+langchain==0.0.262
 langchain-community==0.0.38
 sentence-transformers==2.2.2
 torch==2.9.0
