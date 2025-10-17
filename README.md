@@ -3,6 +3,12 @@ It allows users to upload any PDF document, automatically extract its contents, 
 
 This project integrates Google Gemini 2.5 Flash with LangChain, Chroma, and HuggingFace sentence embeddings, providing a seamless, interactive document understanding experience — all inside a beautiful Streamlit web app.
 
+<img width="1908" height="922" alt="image" src="https://github.com/user-attachments/assets/65113b02-9880-4aa0-9d2b-17d922cc4eec" />
+
+
+
+
+
 🚀 Key Features
 
 📄 PDF Upload & Extraction – Instantly extract clean text from uploaded PDFs.
