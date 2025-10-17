@@ -1,21 +1,10 @@
-# Core libraries
 streamlit==1.29.0
 pdfplumber==0.10.1
-shutilwhich==1.1.0
-
-# LangChain and embeddings
 langchain==0.1.0
 langchain-community==0.0.5
-
-# HuggingFace embeddings
-sentence-transformers==2.2.2
-torch>=2.0.0
-
-# Vectorstore
 chromadb==0.4.9
-
-# Google Generative AI
+sentence-transformers==2.2.2
+torch==2.1.0+cpu
 google-generativeai==0.1.0
-
-# Utilities
 tqdm==4.66.1
+-f https://download.pytorch.org/whl/cpu/torch_stable.html
