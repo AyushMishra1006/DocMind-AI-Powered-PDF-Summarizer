@@ -3,7 +3,7 @@ streamlit
 google-generativeai
 
 # --- LangChain & Vector Store ---
-langchain>=0.2.15,<0.3.0
+langchain==0.2.14
 langchain-community==0.2.14
 chromadb
 sentence-transformers
@@ -18,7 +18,5 @@ tqdm
 tiktoken
 numpy
 pandas
-
-# --- Optional: For HuggingFace Embeddings ---
 transformers
 torch
