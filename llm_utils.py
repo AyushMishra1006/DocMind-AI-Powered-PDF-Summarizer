@@ -1,61 +1,54 @@
-# llm_utils.py
-import google.generativeai as genai
-from embeddings_utils import create_embeddings
+# embeddings_utils.py
+import os
+import shutil
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Chroma
+from text_chunker import chunk_text
 
-# NOTE: It's strongly recommended to store API_KEY in env vars and load via os.getenv.
-# For quick local testing you may keep it here, but don't commit keys to public repos.
-API_KEY = "AIzaSyDIGQP1TtidfN9VGb888u8Ca6kYED6mwK8"
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("gemini-2.5-flash")
+PERSIST_DIR = "chroma_db_policy"
+COLLECTION_NAME = "policy_docs"
 
-class GeminiLLM:
-    """Wrapper for Gemini 2.5 Flash via Google Generative AI."""
-    def __init__(self, model):
-        self.model = model
-
-    def __call__(self, prompt):
-        # you may want to expand parameters (temperature, max output tokens, etc.) if needed
-        response = self.model.generate_content(prompt)
-        return response.text.strip()
-
-llm = GeminiLLM(model)
-
-def ask_question(question, vectordb):
+def clear_old_embeddings():
     """
-    Query the vectordb retriever, build a context prompt and call the LLM.
-    Returns tuple (answer_text, docs_list).
+    Fully clear persisted Chroma DB and any existing collection.
     """
-    if vectordb is None:
-        raise ValueError("Vectorstore not initialized. Create embeddings first by uploading a PDF.")
+    # Remove on-disk data
+    if os.path.exists(PERSIST_DIR):
+        try:
+            shutil.rmtree(PERSIST_DIR)
+        except PermissionError:
+            try:
+                shutil.rmtree(PERSIST_DIR)
+            except Exception:
+                pass
 
-    # Use retriever to pull relevant chunks
-    retriever = vectordb.as_retriever(search_kwargs={"k": 20})
-# Optional: defensive check
-    if vectordb._collection.count() == 0:
-        return "No embeddings found for this PDF. Please re-upload.", []
+    # ⚠️ New: explicitly clear collection if it's still open in memory
+    try:
+        Chroma(persist_directory=PERSIST_DIR, collection_name=COLLECTION_NAME).delete_collection()
+    except Exception:
+        # safe fallback: collection may not exist yet
+        pass
 
 
+def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=COLLECTION_NAME):
+    """
+    Create a fresh Chroma vectorstore for the given text.
+    """
+    # Ensure no old persisted data remains
+    clear_old_embeddings()
 
+    chunks_with_meta = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    texts = [c["content"] for c in chunks_with_meta]
 
-    docs = retriever.get_relevant_documents(question)
-    if not docs:
-        return "No relevant information found in the document.", []
+    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # Build context from retrieved docs
-    context = "\n\n".join([d.page_content for d in docs])
-    prompt = f"""
-You are a highly intelligent assistant.
-Analyze all document chunks below carefully before answering.
+    vectordb = Chroma.from_texts(
+        texts=texts,
+        embedding=embeddings,
+        persist_directory=PERSIST_DIR,
+        collection_name=collection_name
+    )
 
-📄 DOCUMENT CONTENT:
-\"\"\"{context}\"\"\"
-
-🎯 TASK:
-- Use all relevant information across chunks.
-- If multiple items exist (projects, experiences, sections, or other details), list all of them clearly.
-
-User Question: {question}
-"""
-    # Call the LLM wrapper
-    response_text = llm(prompt)
-    return (response_text or "The model did not return any output.", docs)
+    # ✅ Ensure it's persisted and only contains current upload
+    vectordb.persist()
+    return vectordb
