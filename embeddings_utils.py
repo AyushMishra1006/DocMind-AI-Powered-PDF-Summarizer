@@ -12,7 +12,6 @@ def clear_old_embeddings(collection_name=DEFAULT_COLLECTION_NAME):
     """
     Fully clear persisted Chroma DB and any existing collection.
     """
-    # Remove on-disk data
     if os.path.exists(PERSIST_DIR):
         try:
             shutil.rmtree(PERSIST_DIR)
@@ -31,7 +30,6 @@ def create_embeddings(
     """
     Create a fresh Chroma vectorstore for the given text.
     """
-    # Ensure no old persisted data remains
     clear_old_embeddings(collection_name=collection_name)
 
     # Split text into chunks
@@ -41,17 +39,17 @@ def create_embeddings(
     # Initialize embeddings
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # Explicitly pass embeddings as embedding_function
+    # ⚠️ Pass the embeddings object itself, not embed_query
     vectordb = Chroma(
         collection_name=collection_name,
-        embedding_function=embeddings.embed_query,
+        embedding_function=embeddings,  # correct: object with embed_documents()
         persist_directory=PERSIST_DIR
     )
 
-    # Add texts to the collection
+    # Add texts
     vectordb.add_texts(texts)
 
-    # Persist to disk
+    # Persist
     vectordb.persist()
 
     return vectordb
