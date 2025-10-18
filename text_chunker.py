@@ -1,5 +1,5 @@
 # text_chunker.py
-from langchain.text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 def chunk_text(text, chunk_size=1000, chunk_overlap=900):
     """
@@ -17,5 +17,6 @@ def chunk_text(text, chunk_size=1000, chunk_overlap=900):
     # Add metadata (optional: page numbers or order)
     chunks = [{"content": c, "metadata": {"order": i}} for i, c in enumerate(raw_chunks)]
     return chunks
+
 
 
