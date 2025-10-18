@@ -1,3 +1,6 @@
+import sys, os
+sys.path.append(os.path.dirname(__file__))
+
 # main.py
 import streamlit as st
 from pdf_utils import upload_and_extract_pdf
@@ -340,3 +343,4 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
+
