@@ -3,10 +3,10 @@ streamlit
 
 # --- LLM & Embeddings ---
 google-generativeai
-langchain>=0.1.0
-langchain-community
-chromadb
-sentence-transformers
+langchain>=0.2.0
+langchain-community>=0.2.0
+chromadb>=0.5.0
+sentence-transformers>=2.2.2
 faiss-cpu
 
 # --- PDF Processing ---
@@ -18,3 +18,5 @@ tqdm
 tiktoken
 numpy
 pandas
+transformers
+torch
