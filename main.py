@@ -1,6 +1,3 @@
-import sys, os
-sys.path.append(os.path.dirname(__file__))
-
 # main.py
 import streamlit as st
 from pdf_utils import upload_and_extract_pdf
@@ -242,7 +239,13 @@ if pdf_text:
             # 5) Create fresh embeddings with unique collection name (based on hash)
             unique_collection = f"policy_docs_{new_hash[:8]}"
             st.session_state.vectordb = create_embeddings(pdf_text, collection_name=unique_collection)
-            st.session_state.embeddings_ready = True
+
+            if st.session_state.vectordb is None:
+                st.error("❌ Failed to create embeddings. Please try uploading the PDF again.")
+                st.session_state.embeddings_ready = False
+            else:
+                st.session_state.embeddings_ready = True
+
 
         placeholder.empty()
     else:
@@ -343,4 +346,3 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
-
