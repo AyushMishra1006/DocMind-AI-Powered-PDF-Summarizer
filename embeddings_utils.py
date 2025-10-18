@@ -1,26 +1,40 @@
+# embeddings_utils.py
 import os
 import shutil
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from text_chunker import chunk_text
 
-vectordb = None
 PERSIST_DIR = "chroma_db_policy"
 COLLECTION_NAME = "policy_docs"
 
 def clear_old_embeddings():
-    global vectordb
-    if vectordb:
-        vectordb.delete_collection()
+    """
+    Fully clear persisted Chroma DB and any existing collection.
+    """
+    # Remove on-disk data
     if os.path.exists(PERSIST_DIR):
         try:
             shutil.rmtree(PERSIST_DIR)
         except PermissionError:
-            pass
-    vectordb = None
+            try:
+                shutil.rmtree(PERSIST_DIR)
+            except Exception:
+                pass
 
-def create_embeddings(text, chunk_size=1000, chunk_overlap=500):
-    global vectordb
+    # ⚠️ New: explicitly clear collection if it's still open in memory
+    try:
+        Chroma(persist_directory=PERSIST_DIR, collection_name=COLLECTION_NAME).delete_collection()
+    except Exception:
+        # safe fallback: collection may not exist yet
+        pass
+
+
+def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=COLLECTION_NAME):
+    """
+    Create a fresh Chroma vectorstore for the given text.
+    """
+    # Ensure no old persisted data remains
     clear_old_embeddings()
 
     chunks_with_meta = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
@@ -32,6 +46,9 @@ def create_embeddings(text, chunk_size=1000, chunk_overlap=500):
         texts=texts,
         embedding=embeddings,
         persist_directory=PERSIST_DIR,
-        collection_name=COLLECTION_NAME
+        collection_name=collection_name
     )
+
+    # ✅ Ensure it's persisted and only contains current upload
+    vectordb.persist()
     return vectordb
