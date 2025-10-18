@@ -30,6 +30,7 @@ st.markdown("""
     flex-direction: column;
     min-height: 100vh;
 }
+
 .main-title {
     color: #a020f0;
     font-size: 42px;
@@ -41,6 +42,7 @@ st.markdown("""
     border-radius: 12px;
     background: linear-gradient(90deg, black, #2b004d);
 }
+
 .chat-container {
     display: flex;
     flex-direction: column;
@@ -52,6 +54,7 @@ st.markdown("""
     padding: 12px;
     border-radius: 8px;
 }
+
 .user-msg {
     background-color: #a020f0;
     color: white;
@@ -62,6 +65,7 @@ st.markdown("""
     font-weight: bold;
     box-shadow: 0 4px 10px rgba(160,32,240,0.08);
 }
+
 .bot-msg {
     background-color: #4b0082;
     color: white;
@@ -73,6 +77,7 @@ st.markdown("""
     border: 1px solid #a020f0;
     box-shadow: 0 4px 10px rgba(75,0,130,0.08);
 }
+
 .top-input {
     width: 100%;
     max-width: 980px;
@@ -81,6 +86,7 @@ st.markdown("""
     gap:10px;
     align-items: center;
 }
+
 .stTextInput>div>div>input {
     background-color: #d3d3d3;
     color: black;
@@ -90,6 +96,7 @@ st.markdown("""
     width: 100%;
     border: none;
 }
+
 .stButton>button {
     background-color: #a020f0;
     color: white;
@@ -101,6 +108,7 @@ st.markdown("""
 .stButton>button:hover {
     background-color: #8000c0;
 }
+
 .teddy {
     text-align: center;
     font-size: 18px;
@@ -116,6 +124,7 @@ st.markdown("""
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
 }
+
 .footer {
     text-align: center;
     color: #a020f0;
@@ -133,12 +142,15 @@ st.markdown("""
 st.sidebar.header("📄 Upload PDF")
 with st.sidebar:
     pdf_text = upload_and_extract_pdf()
-    st.markdown("""
+    st.markdown(
+        """
         <div style="text-align:center; margin-top:24px; color:#a020f0; font-weight:bold;">
             📄 Ready to process your documents!<br>
             🧩 Drag & drop or upload a PDF to get started...
         </div>
-        """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
 # ---------------------------
 # Main title
@@ -153,6 +165,7 @@ if "chat_history" not in st.session_state:
 
 if "vectordb" not in st.session_state:
     st.session_state.vectordb = None
+    st.session_state.collection_name = None
 
 if "embeddings_ready" not in st.session_state:
     st.session_state.embeddings_ready = False
@@ -194,13 +207,16 @@ if pdf_text:
                 </div>
             """, unsafe_allow_html=True)
             time.sleep(1)
+
+            # Clear all old embeddings safely
             clear_old_embeddings()
             st.session_state.vectordb = None
             st.session_state.embeddings_ready = False
             st.session_state.chat_history = []
             st.session_state.pdf_hash = new_hash
-            unique_collection = f"policy_docs_{new_hash[:8]}"
-            st.session_state.vectordb = create_embeddings(pdf_text, collection_name=unique_collection)
+
+            # Create embeddings (returns vectordb and collection_name)
+            st.session_state.vectordb = create_embeddings(pdf_text)
             st.session_state.embeddings_ready = True
         placeholder.empty()
     else:
@@ -213,7 +229,6 @@ if pdf_text:
                     </div>
                 """, unsafe_allow_html=True)
                 time.sleep(0.6)
-                clear_old_embeddings()
                 st.session_state.vectordb = create_embeddings(pdf_text)
                 st.session_state.embeddings_ready = True
             placeholder.empty()
@@ -226,9 +241,6 @@ if pdf_text:
         st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
         st.rerun()
 
-    # ---------------------------
-    # Generate answer
-    # ---------------------------
     placeholder_bot_index = None
     for idx, (role, txt) in enumerate(st.session_state.chat_history):
         if role == "bot" and txt == "Generating answer...":
@@ -243,6 +255,7 @@ if pdf_text:
             "🧠 Analyzing your document...",
             "💭 Almost there..."
         ])
+
         for _ in range(6):
             loading_box.markdown(f"""
                 <div class="teddy">
@@ -254,13 +267,11 @@ if pdf_text:
 
         if st.session_state.vectordb is None:
             answer = "Embeddings not ready. Please upload a PDF and wait for processing."
-            docs = []
         else:
             try:
                 answer, docs = ask_question(user_input, st.session_state.vectordb)
             except Exception as e:
                 answer = f"Error while querying the document: {e}"
-                docs = []
 
         st.session_state.chat_history[placeholder_bot_index] = ("bot", answer)
         loading_box.empty()
@@ -279,10 +290,10 @@ if pdf_text:
 
 else:
     st.markdown("""
-        <div class="teddy">
-            <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
-            <p>🧸 Upload a PDF to get started!</p>
-        </div>
+    <div class="teddy">
+        <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
+        <p>🧸 Upload a PDF to get started!</p>
+    </div>
     """, unsafe_allow_html=True)
 
 # ---------------------------
