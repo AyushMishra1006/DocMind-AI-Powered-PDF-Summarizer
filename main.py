@@ -9,6 +9,8 @@ import itertools
 import hashlib
 
 
+import embeddings_utils
+st.write("Available functions:", dir(embeddings_utils))
 
 # ---------------------------
 # Page configuration
@@ -346,3 +348,4 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
+
