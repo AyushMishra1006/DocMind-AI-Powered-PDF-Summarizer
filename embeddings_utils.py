@@ -1,16 +1,16 @@
 # embeddings_utils.py
 import os
 import shutil
+import uuid
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from text_chunker import chunk_text
 
 PERSIST_DIR = "chroma_db_policy"
-DEFAULT_COLLECTION_NAME = "policy_docs"
 
-def clear_old_embeddings(collection_name=DEFAULT_COLLECTION_NAME):
+def clear_old_embeddings():
     """
-    Fully clear persisted Chroma DB and any existing collection.
+    Fully clear persisted Chroma DB to avoid collection conflicts.
     """
     if os.path.exists(PERSIST_DIR):
         try:
@@ -21,16 +21,13 @@ def clear_old_embeddings(collection_name=DEFAULT_COLLECTION_NAME):
             except Exception:
                 pass
 
-def create_embeddings(
-    text, 
-    chunk_size=1000, 
-    chunk_overlap=500, 
-    collection_name=DEFAULT_COLLECTION_NAME
-):
+def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=None):
     """
-    Create a fresh Chroma vectorstore for the given text.
+    Create a Chroma vectorstore for the given text.
+    Each upload uses a unique collection name if not provided.
     """
-    clear_old_embeddings(collection_name=collection_name)
+    if collection_name is None:
+        collection_name = f"collection_{uuid.uuid4().hex[:8]}"
 
     # Split text into chunks
     chunks_with_meta = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
@@ -39,17 +36,17 @@ def create_embeddings(
     # Initialize embeddings
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # ⚠️ Pass the embeddings object itself, not embed_query
+    # Create a new vectorstore safely
     vectordb = Chroma(
         collection_name=collection_name,
-        embedding_function=embeddings,  # correct: object with embed_documents()
+        embedding_function=embeddings,
         persist_directory=PERSIST_DIR
     )
 
     # Add texts
     vectordb.add_texts(texts)
 
-    # Persist
+    # Persist to disk
     vectordb.persist()
 
-    return vectordb
+    return vectordb, collection_name
