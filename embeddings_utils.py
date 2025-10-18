@@ -1,11 +1,13 @@
 # embeddings_utils.py
 import os
 import shutil
+import tempfile
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from text_chunker import chunk_text
 
-PERSIST_DIR = "chroma_db_policy"
+# Use a temporary folder for Streamlit Cloud compatibility
+PERSIST_DIR = os.path.join(tempfile.gettempdir(), "chroma_db_policy")
 COLLECTION_NAME = "policy_docs"
 
 def clear_old_embeddings():
@@ -22,17 +24,16 @@ def clear_old_embeddings():
             except Exception:
                 pass
 
-    # ⚠️ New: explicitly clear collection if it's still open in memory
+    # Attempt to clear collection in memory if exists
     try:
         Chroma(persist_directory=PERSIST_DIR, collection_name=COLLECTION_NAME).delete_collection()
     except Exception:
-        # safe fallback: collection may not exist yet
         pass
-
 
 def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=COLLECTION_NAME):
     """
     Create a fresh Chroma vectorstore for the given text.
+    Returns the vectorstore object or None if failed.
     """
     # Ensure no old persisted data remains
     clear_old_embeddings()
@@ -42,16 +43,18 @@ def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=
 
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    vectordb = Chroma.from_texts(
-        texts=texts,
-        embedding=embeddings,
-        persist_directory=PERSIST_DIR,
-        collection_name=collection_name
-    )
+    # Safe collection name: alphanumeric only
+    safe_collection_name = "".join(c for c in collection_name if c.isalnum() or c == "_")
 
-    # ✅ Ensure it's persisted and only contains current upload
-    vectordb.persist()
-    return vectordb
-
-
-
+    try:
+        vectordb = Chroma.from_texts(
+            texts=texts,
+            embedding=embeddings,
+            persist_directory=PERSIST_DIR,
+            collection_name=safe_collection_name
+        )
+        vectordb.persist()
+        return vectordb
+    except Exception as e:
+        print(f"❌ Chroma vectorstore creation failed: {e}")
+        return None
