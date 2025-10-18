@@ -1,12 +1,19 @@
+# --- Core App ---
 streamlit
+
+# --- LLM & Embeddings ---
 google-generativeai
-langchain
+langchain>=0.1.0
 langchain-community
 chromadb
 sentence-transformers
 faiss-cpu
+
+# --- PDF Processing ---
 PyMuPDF
 pdfplumber
+
+# --- Utils ---
 tqdm
 tiktoken
 numpy
