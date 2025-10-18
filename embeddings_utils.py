@@ -52,3 +52,6 @@ def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=
     # ✅ Ensure it's persisted and only contains current upload
     vectordb.persist()
     return vectordb
+
+
+
