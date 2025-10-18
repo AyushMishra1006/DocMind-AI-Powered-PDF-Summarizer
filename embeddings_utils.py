@@ -22,14 +22,6 @@ def clear_old_embeddings(collection_name=DEFAULT_COLLECTION_NAME):
             except Exception:
                 pass
 
-    # Attempt to clear in-memory collection if exists
-    try:
-        Chroma(persist_directory=PERSIST_DIR, collection_name=collection_name).delete_collection()
-    except Exception:
-        # Safe fallback: collection may not exist yet
-        pass
-
-
 def create_embeddings(
     text, 
     chunk_size=1000, 
@@ -42,20 +34,22 @@ def create_embeddings(
     # Ensure no old persisted data remains
     clear_old_embeddings(collection_name=collection_name)
 
-    # Split text into chunks with metadata
+    # Split text into chunks
     chunks_with_meta = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     texts = [c["content"] for c in chunks_with_meta]
 
     # Initialize embeddings
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # Create Chroma vectorstore
-    vectordb = Chroma.from_texts(
-        texts=texts,
-        embedding=embeddings,               # ✅ Required
-        persist_directory=PERSIST_DIR,
-        collection_name=collection_name
+    # Explicitly pass embeddings as embedding_function
+    vectordb = Chroma(
+        collection_name=collection_name,
+        embedding_function=embeddings.embed_query,
+        persist_directory=PERSIST_DIR
     )
+
+    # Add texts to the collection
+    vectordb.add_texts(texts)
 
     # Persist to disk
     vectordb.persist()
