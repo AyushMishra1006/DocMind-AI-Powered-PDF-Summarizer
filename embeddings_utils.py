@@ -30,16 +30,17 @@ def create_embeddings(
 ):
     """
     Create a Chroma vectorstore for the given text.
-    If persist_dir is None, uses in-memory storage (avoids readonly DB errors in Streamlit Cloud).
+    Uses a temporary folder if persist_dir is None (avoids readonly DB errors in Streamlit Cloud).
     """
     if not text or text.strip() == "":
         return None
 
-    # Use a temporary folder if none provided
+    # Use a temporary folder per PDF to avoid collection conflicts and readonly errors
     if persist_dir is None:
-        # Use system temp folder for this PDF
         temp_folder = tempfile.gettempdir()
+        # Unique folder per PDF based on content hash
         persist_dir = os.path.join(temp_folder, f"{collection_name}_{hash(text) & 0xffffffff:x}")
+        os.makedirs(persist_dir, exist_ok=True)
 
     # Clear old embeddings in this folder only
     clear_old_embeddings(collection_name=collection_name, persist_directory=persist_dir)
@@ -58,7 +59,7 @@ def create_embeddings(
     vectordb = Chroma.from_texts(
         texts=texts,
         embedding=embeddings,
-        persist_directory=persist_dir,  # can be None for in-memory
+        persist_directory=persist_dir,
         collection_name=collection_name
     )
 
@@ -66,6 +67,7 @@ def create_embeddings(
     try:
         vectordb.persist()
     except Exception:
-        pass  # ignore persistence errors in readonly environment
+        # safe fallback: ignore persistence errors in read-only environment
+        pass
 
     return vectordb
