@@ -231,7 +231,7 @@ if is_new_upload:
         st.session_state.vectordb = create_embeddings(
             pdf_text,
             collection_name=collection_name,
-            persist_dir=persist_dir
+            persist_dir=None
         )
         st.session_state.embeddings_ready = True
     except Exception as e:
@@ -331,3 +331,4 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
+
