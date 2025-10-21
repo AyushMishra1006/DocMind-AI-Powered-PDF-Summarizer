@@ -1,6 +1,10 @@
 # Core Streamlit app
 streamlit==1.49.1
-pip>=24.3
+
+# Internal dependencies Streamlit needs
+rich
+markdown-it-py
+mdurl
 
 # LangChain + Vector Database
 langchain==0.3.27
@@ -9,7 +13,7 @@ chromadb==1.1.0
 sentence-transformers==5.1.1
 InstructorEmbedding==1.0.1
 
-# Torch CPU builds only (for embeddings and model inference)
+# Torch CPU builds only
 torch==2.2.2
 torchvision==0.17.2
 torchaudio==2.2.2
@@ -37,6 +41,6 @@ python-dotenv==1.0.0
 requests==2.32.5
 tqdm==4.67.1
 
-# Ensure compatible versions of libraries Streamlit uses internally
+# Optional internal dependencies
 protobuf==5.29.5
 watchdog==6.0.0
