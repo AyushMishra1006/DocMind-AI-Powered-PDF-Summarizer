@@ -14,3 +14,4 @@ def upload_and_extract_pdf():
                     text += page_text + "\n"
         return text.strip()
     return None
+
