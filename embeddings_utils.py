@@ -30,7 +30,7 @@ def create_embeddings(
         texts=texts,
         embedding=embeddings,
         collection_name=collection_name,
-        client_settings={"chromadb": {"anonymized_telemetry": False}},
+        #client_settings={"chromadb": {"anonymized_telemetry": False}},
         persist_directory=None
     )
 
@@ -40,3 +40,4 @@ def create_embeddings(
 def clear_old_embeddings(persist_directory=None):
     """No-op function to avoid filesystem writes."""
     pass
+
