@@ -8,8 +8,6 @@ import time
 import itertools
 import hashlib
 
-
-
 # ---------------------------
 # Page configuration
 # ---------------------------
@@ -90,8 +88,8 @@ st.markdown("""
     width: 100%;
     max-width: 980px;
     margin: 10px auto;
-    display:flex;
-    gap:10px;
+    display: flex;
+    gap: 10px;
     align-items: center;
 }
 
@@ -170,7 +168,7 @@ with st.sidebar:
 st.markdown('<div class="main-title">🤖 DocMind – PDF Q&A Assistant</div>', unsafe_allow_html=True)
 
 # ---------------------------
-# Initialize states (safe defaults)
+# Initialize states
 # ---------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -181,7 +179,6 @@ if "vectordb" not in st.session_state:
 if "embeddings_ready" not in st.session_state:
     st.session_state.embeddings_ready = False
 
-# store the last processed PDF hash so we can detect new uploads reliably
 if "pdf_hash" not in st.session_state:
     st.session_state.pdf_hash = None
 
@@ -203,27 +200,33 @@ def compute_text_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 # ---------------------------
+# Detect new upload
+# ---------------------------
+current_pdf_hash = compute_text_hash(pdf_text)
+is_new_upload = current_pdf_hash and current_pdf_hash != st.session_state.pdf_hash
+
+# ---------------------------
 # PDF Processing and Q&A
 # ---------------------------
 if is_new_upload:
-    # Reset session and placeholders
+    # Reset session
     st.session_state.chat_history = []
     st.session_state.embeddings_ready = False
+    st.session_state.pdf_hash = current_pdf_hash
 
-    # 1) Clear old vectordb object in memory
+    # Clear old vectordb
     if st.session_state.vectordb is not None:
         try:
-            st.session_state.vectordb._collection.delete()  # delete previous collection
+            st.session_state.vectordb._collection.delete()
         except Exception:
             pass
         st.session_state.vectordb = None
 
-    # 2) Create unique folder for this PDF
-    unique_hash = compute_text_hash(pdf_text)[:8]
+    # Create new embeddings
+    unique_hash = current_pdf_hash[:8]
     persist_dir = f"chroma_db_policy_{unique_hash}"
     collection_name = f"policy_docs_{unique_hash}"
 
-    # 3) Create fresh embeddings safely
     try:
         st.session_state.vectordb = create_embeddings(
             pdf_text,
@@ -235,86 +238,76 @@ if is_new_upload:
         st.error(f"❌ Failed to create embeddings for the new PDF: {e}")
         st.session_state.embeddings_ready = False
 
-
-
-        placeholder.empty()
-    else:
-        # If the PDF hasn't changed but embeddings are not ready (e.g., first run),
-        # create embeddings once.
-        if not st.session_state.embeddings_ready:
-            with st.spinner("Preparing your document..."):
-                placeholder.markdown("""
-                    <div class="teddy">
-                        <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
-                        <p>🤖 Preparing document (continuing)...</p>
-                    </div>
-                """, unsafe_allow_html=True)
-                time.sleep(0.6)
-
-                # Ensure persisted state is clear, then create (defensive)
-                try:
-                    embeddings_utils.clear_old_embeddings()
-                except Exception as e:
-                    st.warning(f"Failed to clear old embeddings: {e}")
-
-                st.session_state.vectordb = create_embeddings(pdf_text)
-                st.session_state.embeddings_ready = True
-
-            placeholder.empty()
-
-    # ---------------------------
-    # Handle user input
-    # ---------------------------
-    if submit and user_input and user_input.strip():
-        st.session_state.chat_history.insert(0, ("user", user_input.strip()))
-        st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
-        # re-run to show generating UI and then compute answer
-        st.rerun()
-
-    # Find bot placeholder to compute answer in next render
-    placeholder_bot_index = None
-    for idx, (role, txt) in enumerate(st.session_state.chat_history):
-        if role == "bot" and txt == "Generating answer...":
-            placeholder_bot_index = idx
-            break
-
-    if placeholder_bot_index is not None:
-        loading_box = st.empty()
-        messages = itertools.cycle([
-            "🤖 Thinking deeply...",
-            "⚡ Searching for the best answer...",
-            "🧠 Analyzing your document...",
-            "💭 Almost there..."
-        ])
-
-        for _ in range(6):
-            loading_box.markdown(f"""
+else:
+    # Use previous embeddings or create if missing
+    if pdf_text and not st.session_state.embeddings_ready:
+        with st.spinner("Preparing your document..."):
+            st.markdown("""
                 <div class="teddy">
                     <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
-                    <p style="font-size:16px;">{next(messages)}</p>
+                    <p>🤖 Preparing document (continuing)...</p>
                 </div>
             """, unsafe_allow_html=True)
-            time.sleep(1.6)
-
-        # Use the up-to-date vectordb from session_state
-        if st.session_state.vectordb is None:
-            answer = "Embeddings not ready. Please upload a PDF and wait for processing."
-            docs = []
-        else:
+            time.sleep(0.6)
             try:
-                answer, docs = ask_question(user_input, st.session_state.vectordb)
+                clear_old_embeddings()
             except Exception as e:
-                answer = f"Error while querying the document: {e}"
-                docs = []
+                st.warning(f"Failed to clear old embeddings: {e}")
 
-        # Replace placeholder with the real answer
-        st.session_state.chat_history[placeholder_bot_index] = ("bot", answer)
-        loading_box.empty()
-        st.rerun()
+            st.session_state.vectordb = create_embeddings(pdf_text)
+            st.session_state.embeddings_ready = True
 
-    # ---------------------------
-    # Render chat (most recent first)
-    # ---------------------------
+# ---------------------------
+# Handle user input
+# ---------------------------
+if submit and user_input and user_input.strip():
+    st.session_state.chat_history.insert(0, ("user", user_input.strip()))
+    st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
+    st.rerun()
+
+# Find placeholder message
+placeholder_bot_index = None
+for idx, (role, txt) in enumerate(st.session_state.chat_history):
+    if role == "bot" and txt == "Generating answer...":
+        placeholder_bot_index = idx
+        break
+
+if placeholder_bot_index is not None:
+    loading_box = st.empty()
+    messages = itertools.cycle([
+        "🤖 Thinking deeply...",
+        "⚡ Searching for the best answer...",
+        "🧠 Analyzing your document...",
+        "💭 Almost there..."
+    ])
+
+    for _ in range(6):
+        loading_box.markdown(f"""
+            <div class="teddy">
+                <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
+                <p style="font-size:16px;">{next(messages)}</p>
+            </div>
+        """, unsafe_allow_html=True)
+        time.sleep(1.6)
+
+    if st.session_state.vectordb is None:
+        answer = "Embeddings not ready. Please upload a PDF and wait for processing."
+        docs = []
+    else:
+        try:
+            answer, docs = ask_question(user_input, st.session_state.vectordb)
+        except Exception as e:
+            answer = f"Error while querying the document: {e}"
+            docs = []
+
+    st.session_state.chat_history[placeholder_bot_index] = ("bot", answer)
+    loading_box.empty()
+    st.rerun()
+
+# ---------------------------
+# Render chat
+# ---------------------------
+if pdf_text:
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     for role, msg in st.session_state.chat_history:
         if role == "user":
@@ -322,9 +315,7 @@ if is_new_upload:
         else:
             st.markdown(f'<div class="bot-msg">Bot — {msg}</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
-
 else:
-    # No PDF yet
     st.markdown("""
     <div class="teddy">
         <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
@@ -340,4 +331,3 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
-
