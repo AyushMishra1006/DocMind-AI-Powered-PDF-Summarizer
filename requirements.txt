@@ -234,7 +234,8 @@ tokenizers==0.22.1
 toml==0.10.2
 tomlkit==0.13.3
 toolz==1.0.0
-torch==2.5.1+cu121
+torch==2.5.1
+
 torchaudio==2.5.1+cu121
 torchvision==0.20.1+cu121
 tornado==6.4.1
@@ -264,3 +265,4 @@ widgetsnbextension==4.0.13
 yarl==1.20.1
 zipp==3.23.0
 zstandard==0.25.0
+
