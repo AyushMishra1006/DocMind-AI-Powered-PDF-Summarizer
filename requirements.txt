@@ -1,13 +1,43 @@
+# Streamlit app
 streamlit==1.49.1
+
+# LangChain + Vector Database
 langchain==0.3.27
 langchain-community==0.3.29
 chromadb==1.1.0
 sentence-transformers==3.2.1
 InstructorEmbedding==1.0.1
+
+# Torch CPU (Python 3.13 compatible)
 torch>=2.5.0
-numpy
-pandas
+torchvision>=0.20.0
+torchaudio>=2.5.0
+transformers==4.45.2
+
+# PDF handling
+pdfplumber==0.11.0
+PyPDF2==3.0.1
+pdfminer.six==20250506
+
+# Data processing and utilities
+pandas==2.2.3
+numpy==1.26.4
+scikit-learn==1.5.2
+faiss-cpu==1.8.0
+
+# Visualization
+plotly==6.0.0
+matplotlib==3.9.2
+seaborn==0.13.2
+altair==5.4.1
+
+# Misc
+python-dotenv==1.0.1
+requests==2.32.3
+tqdm==4.66.4
 rich
 markdown-it-py
 mdurl
 pygments
+protobuf==5.29.5
+watchdog==4.0.1
