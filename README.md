@@ -43,7 +43,7 @@ Embedding Creation → Converts each chunk into high-dimensional vectors using H
 
 Vector Store → Stores embeddings in a ChromaDB collection.
 
-Live Demo - [Click Here](https://docmind-ai-powered-pdf-summarizer-sjqzaeizxfyewp5qzlhw2z.streamlit.app/)
+Live Demo - [CLICK HERE](https://docmind-ai-powered-pdf-summarizer-rk3wzyes6jbbuoamuolba7.streamlit.app/)
 
 Query Processing → Retrieves top k similar chunks relevant to the user’s question.
 
