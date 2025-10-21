@@ -1,3 +1,6 @@
+--use-pep517
+
+
 # Core Streamlit app
 streamlit==1.49.1
 
@@ -46,4 +49,5 @@ tqdm==4.67.1
 # Optional internal dependencies
 protobuf==5.29.5
 watchdog==6.0.0
+
 
