@@ -12,27 +12,31 @@ def create_embeddings(
 ):
     """
     Create embeddings entirely in memory (no disk writes).
-    Safe for Streamlit Cloud deployment.
+    Works perfectly on Streamlit Cloud.
     """
     if not text or text.strip() == "":
         return None
 
-    # Split text into chunks
     chunks_with_meta = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     texts = [c["content"] for c in chunks_with_meta]
 
     if not texts:
         return None
 
-    # Initialize embedding model
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-    # Create in-memory Chroma (NO persist_directory)
+    # ✅ Force in-memory mode (no SQLite persistence)
     vectordb = Chroma.from_texts(
         texts=texts,
         embedding=embeddings,
-        collection_name=collection_name
+        collection_name=collection_name,
+        client_settings={"chromadb": {"anonymized_telemetry": False}},
+        persist_directory=None
     )
 
-    # Do NOT persist — in-memory only
     return vectordb
+
+
+def clear_old_embeddings(persist_directory=None):
+    """No-op function to avoid filesystem writes."""
+    pass
