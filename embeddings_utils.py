@@ -1,4 +1,3 @@
-# embeddings_utils.py
 import os
 import shutil
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -8,7 +7,7 @@ from text_chunker import chunk_text
 PERSIST_DIR = "chroma_db_policy"
 COLLECTION_NAME = "policy_docs"
 
-def clear_old_embeddings():
+def clear_old_embeddings(collection_name=COLLECTION_NAME):
     """
     Fully clear persisted Chroma DB and any existing collection.
     """
@@ -22,23 +21,29 @@ def clear_old_embeddings():
             except Exception:
                 pass
 
-    # ⚠️ New: explicitly clear collection if it's still open in memory
+    # Attempt to delete the collection if still open in memory
     try:
-        Chroma(persist_directory=PERSIST_DIR, collection_name=COLLECTION_NAME).delete_collection()
+        Chroma(persist_directory=PERSIST_DIR, collection_name=collection_name).delete_collection()
     except Exception:
-        # safe fallback: collection may not exist yet
         pass
-
 
 def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=COLLECTION_NAME):
     """
     Create a fresh Chroma vectorstore for the given text.
     """
+    if not text or text.strip() == "":
+        # Defensive: empty input
+        return None
+
     # Ensure no old persisted data remains
-    clear_old_embeddings()
+    clear_old_embeddings(collection_name=collection_name)
 
     chunks_with_meta = chunk_text(text, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     texts = [c["content"] for c in chunks_with_meta]
+
+    if not texts:
+        # Defensive: no chunks extracted
+        return None
 
     embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
@@ -49,6 +54,6 @@ def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=
         collection_name=collection_name
     )
 
-    # ✅ Ensure it's persisted and only contains current upload
+    # Persist to disk
     vectordb.persist()
     return vectordb
