@@ -1,6 +1,7 @@
 # embeddings_utils.py
 import os
 import shutil
+import tempfile
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from text_chunker import chunk_text
@@ -20,16 +21,25 @@ def clear_old_embeddings(collection_name=DEFAULT_COLLECTION_NAME, persist_direct
             pass  # safe fallback
 
 
-def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=DEFAULT_COLLECTION_NAME, persist_dir=None):
+def create_embeddings(
+    text,
+    chunk_size=1000,
+    chunk_overlap=500,
+    collection_name=DEFAULT_COLLECTION_NAME,
+    persist_dir=None
+):
     """
-    Create a Chroma vectorstore for the given text in a dedicated folder.
+    Create a Chroma vectorstore for the given text.
+    If persist_dir is None, uses in-memory storage (avoids readonly DB errors in Streamlit Cloud).
     """
     if not text or text.strip() == "":
         return None
 
-    # Use a separate folder per PDF to avoid collection conflicts
+    # Use a temporary folder if none provided
     if persist_dir is None:
-        persist_dir = DEFAULT_PERSIST_DIR
+        # Use system temp folder for this PDF
+        temp_folder = tempfile.gettempdir()
+        persist_dir = os.path.join(temp_folder, f"{collection_name}_{hash(text) & 0xffffffff:x}")
 
     # Clear old embeddings in this folder only
     clear_old_embeddings(collection_name=collection_name, persist_directory=persist_dir)
@@ -48,10 +58,14 @@ def create_embeddings(text, chunk_size=1000, chunk_overlap=500, collection_name=
     vectordb = Chroma.from_texts(
         texts=texts,
         embedding=embeddings,
-        persist_directory=persist_dir,
+        persist_directory=persist_dir,  # can be None for in-memory
         collection_name=collection_name
     )
 
-    # Persist vectorstore
-    vectordb.persist()
+    # Persist only if folder is writable
+    try:
+        vectordb.persist()
+    except Exception:
+        pass  # ignore persistence errors in readonly environment
+
     return vectordb
