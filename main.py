@@ -205,49 +205,36 @@ def compute_text_hash(text: str) -> str:
 # ---------------------------
 # PDF Processing and Q&A
 # ---------------------------
-if pdf_text:
-    placeholder = st.empty()
-    new_hash = compute_text_hash(pdf_text)
+if is_new_upload:
+    # Reset session and placeholders
+    st.session_state.chat_history = []
+    st.session_state.embeddings_ready = False
 
-    # If the uploaded PDF is different from the last processed one, force a full rebuild.
-    is_new_upload = new_hash != st.session_state.pdf_hash
+    # 1) Clear old vectordb object in memory
+    if st.session_state.vectordb is not None:
+        try:
+            st.session_state.vectordb._collection.delete()  # delete previous collection
+        except Exception:
+            pass
+        st.session_state.vectordb = None
 
-    if is_new_upload:
-        # Reset flags and clear persisted data
-        with st.spinner("Preparing your document..."):
-            placeholder.markdown("""
-                <div class="teddy">
-                    <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
-                    <p>🤖 New PDF detected — preparing document. Hang tight 💜</p>
-                </div>
-            """, unsafe_allow_html=True)
-            time.sleep(1)
+    # 2) Create unique folder for this PDF
+    unique_hash = compute_text_hash(pdf_text)[:8]
+    persist_dir = f"chroma_db_policy_{unique_hash}"
+    collection_name = f"policy_docs_{unique_hash}"
 
-            # 1) Clear on-disk persisted embeddings (full wipe)
-            try:
-                embeddings_utils.clear_old_embeddings()
-            except Exception as e:
-                st.warning(f"Failed to clear old embeddings: {e}")
+    # 3) Create fresh embeddings safely
+    try:
+        st.session_state.vectordb = create_embeddings(
+            pdf_text,
+            collection_name=collection_name,
+            persist_dir=persist_dir
+        )
+        st.session_state.embeddings_ready = True
+    except Exception as e:
+        st.error(f"❌ Failed to create embeddings for the new PDF: {e}")
+        st.session_state.embeddings_ready = False
 
-            # 2) Clear session vectordb and mark embeddings not ready
-            st.session_state.vectordb = None
-            st.session_state.embeddings_ready = False
-
-            # 3) Optionally clear chat_history so prior answers won't be mixed
-            st.session_state.chat_history = []
-
-            # 4) Store new hash so subsequent reruns don't re-create
-            st.session_state.pdf_hash = new_hash
-
-            # 5) Create fresh embeddings with unique collection name (based on hash)
-            unique_collection = f"policy_docs_{new_hash[:8]}"
-            st.session_state.vectordb = create_embeddings(pdf_text, collection_name=unique_collection)
-
-            if st.session_state.vectordb is None:
-                st.error("❌ Failed to create embeddings. Please try uploading the PDF again.")
-                st.session_state.embeddings_ready = False
-            else:
-                st.session_state.embeddings_ready = True
 
 
         placeholder.empty()
@@ -353,3 +340,4 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
+
