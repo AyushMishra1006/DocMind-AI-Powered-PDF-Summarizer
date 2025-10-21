@@ -2,13 +2,13 @@
 import streamlit as st
 from pdf_utils import upload_and_extract_pdf
 import embeddings_utils
-from embeddings_utils import create_embeddings
+from embeddings_utils import create_embeddings, clear_old_embeddings
 from llm_utils import ask_question
 import time
 import itertools
 import hashlib
 
-st.write("Available functions:", dir(embeddings_utils))
+
 
 # ---------------------------
 # Page configuration
@@ -181,6 +181,7 @@ if "vectordb" not in st.session_state:
 if "embeddings_ready" not in st.session_state:
     st.session_state.embeddings_ready = False
 
+# store the last processed PDF hash so we can detect new uploads reliably
 if "pdf_hash" not in st.session_state:
     st.session_state.pdf_hash = None
 
@@ -207,9 +208,12 @@ def compute_text_hash(text: str) -> str:
 if pdf_text:
     placeholder = st.empty()
     new_hash = compute_text_hash(pdf_text)
+
+    # If the uploaded PDF is different from the last processed one, force a full rebuild.
     is_new_upload = new_hash != st.session_state.pdf_hash
 
     if is_new_upload:
+        # Reset flags and clear persisted data
         with st.spinner("Preparing your document..."):
             placeholder.markdown("""
                 <div class="teddy">
@@ -219,17 +223,23 @@ if pdf_text:
             """, unsafe_allow_html=True)
             time.sleep(1)
 
-            # Clear on-disk persisted embeddings (safe)
+            # 1) Clear on-disk persisted embeddings (full wipe)
             try:
                 embeddings_utils.clear_old_embeddings()
             except Exception as e:
                 st.warning(f"Failed to clear old embeddings: {e}")
 
+            # 2) Clear session vectordb and mark embeddings not ready
             st.session_state.vectordb = None
             st.session_state.embeddings_ready = False
+
+            # 3) Optionally clear chat_history so prior answers won't be mixed
             st.session_state.chat_history = []
+
+            # 4) Store new hash so subsequent reruns don't re-create
             st.session_state.pdf_hash = new_hash
 
+            # 5) Create fresh embeddings with unique collection name (based on hash)
             unique_collection = f"policy_docs_{new_hash[:8]}"
             st.session_state.vectordb = create_embeddings(pdf_text, collection_name=unique_collection)
 
@@ -239,8 +249,11 @@ if pdf_text:
             else:
                 st.session_state.embeddings_ready = True
 
+
         placeholder.empty()
     else:
+        # If the PDF hasn't changed but embeddings are not ready (e.g., first run),
+        # create embeddings once.
         if not st.session_state.embeddings_ready:
             with st.spinner("Preparing your document..."):
                 placeholder.markdown("""
@@ -251,6 +264,7 @@ if pdf_text:
                 """, unsafe_allow_html=True)
                 time.sleep(0.6)
 
+                # Ensure persisted state is clear, then create (defensive)
                 try:
                     embeddings_utils.clear_old_embeddings()
                 except Exception as e:
@@ -267,9 +281,10 @@ if pdf_text:
     if submit and user_input and user_input.strip():
         st.session_state.chat_history.insert(0, ("user", user_input.strip()))
         st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
+        # re-run to show generating UI and then compute answer
         st.rerun()
 
-    # Compute answer for "Generating answer..." placeholder
+    # Find bot placeholder to compute answer in next render
     placeholder_bot_index = None
     for idx, (role, txt) in enumerate(st.session_state.chat_history):
         if role == "bot" and txt == "Generating answer...":
@@ -294,6 +309,7 @@ if pdf_text:
             """, unsafe_allow_html=True)
             time.sleep(1.6)
 
+        # Use the up-to-date vectordb from session_state
         if st.session_state.vectordb is None:
             answer = "Embeddings not ready. Please upload a PDF and wait for processing."
             docs = []
@@ -304,12 +320,13 @@ if pdf_text:
                 answer = f"Error while querying the document: {e}"
                 docs = []
 
+        # Replace placeholder with the real answer
         st.session_state.chat_history[placeholder_bot_index] = ("bot", answer)
         loading_box.empty()
         st.rerun()
 
     # ---------------------------
-    # Render chat
+    # Render chat (most recent first)
     # ---------------------------
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     for role, msg in st.session_state.chat_history:
@@ -320,6 +337,7 @@ if pdf_text:
     st.markdown('</div>', unsafe_allow_html=True)
 
 else:
+    # No PDF yet
     st.markdown("""
     <div class="teddy">
         <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
