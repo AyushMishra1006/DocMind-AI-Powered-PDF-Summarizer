@@ -1,8 +1,7 @@
 # main.py
 import streamlit as st
 from pdf_utils import upload_and_extract_pdf
-import embeddings_utils
-from embeddings_utils import create_embeddings, clear_old_embeddings
+from embeddings_utils import create_embeddings
 from llm_utils import ask_question
 import time
 import itertools
@@ -18,7 +17,7 @@ st.set_page_config(
 )
 
 # ---------------------------
-# CSS Styling (keeps your black/purple theme)
+# CSS Styling (Black/Purple Theme)
 # ---------------------------
 st.markdown("""
 <style>
@@ -168,7 +167,7 @@ with st.sidebar:
 st.markdown('<div class="main-title">🤖 DocMind – PDF Q&A Assistant</div>', unsafe_allow_html=True)
 
 # ---------------------------
-# Initialize states
+# Initialize session state
 # ---------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -213,49 +212,42 @@ if is_new_upload:
     st.session_state.chat_history = []
     st.session_state.embeddings_ready = False
     st.session_state.pdf_hash = current_pdf_hash
+    st.session_state.vectordb = None
 
-    # Clear old vectordb
-    if st.session_state.vectordb is not None:
-        try:
-            st.session_state.vectordb._collection.delete()
-        except Exception:
-            pass
-        st.session_state.vectordb = None
-
-    # Create new embeddings
+    # Create new embeddings (in-memory)
     unique_hash = current_pdf_hash[:8]
-    persist_dir = f"chroma_db_policy_{unique_hash}"
     collection_name = f"policy_docs_{unique_hash}"
 
     try:
         st.session_state.vectordb = create_embeddings(
             pdf_text,
             collection_name=collection_name,
-            persist_dir=None
+            persist_dir=None  # in-memory; avoids readonly db
         )
         st.session_state.embeddings_ready = True
     except Exception as e:
         st.error(f"❌ Failed to create embeddings for the new PDF: {e}")
         st.session_state.embeddings_ready = False
 
-else:
-    # Use previous embeddings or create if missing
-    if pdf_text and not st.session_state.embeddings_ready:
-        with st.spinner("Preparing your document..."):
-            st.markdown("""
-                <div class="teddy">
-                    <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
-                    <p>🤖 Preparing document (continuing)...</p>
-                </div>
-            """, unsafe_allow_html=True)
-            time.sleep(0.6)
-            try:
-                clear_old_embeddings()
-            except Exception as e:
-                st.warning(f"Failed to clear old embeddings: {e}")
-
-            st.session_state.vectordb = create_embeddings(pdf_text)
+elif pdf_text and not st.session_state.embeddings_ready:
+    with st.spinner("Preparing your document..."):
+        st.markdown("""
+            <div class="teddy">
+                <img src="https://media.tenor.com/_lYNcVvfWO8AAAAd/robot-teddy.gif">
+                <p>🤖 Preparing document (continuing)...</p>
+            </div>
+        """, unsafe_allow_html=True)
+        time.sleep(0.6)
+        try:
+            st.session_state.vectordb = create_embeddings(
+                pdf_text,
+                collection_name="policy_docs_temp",
+                persist_dir=None
+            )
             st.session_state.embeddings_ready = True
+        except Exception as e:
+            st.error(f"❌ Failed to prepare embeddings: {e}")
+            st.session_state.embeddings_ready = False
 
 # ---------------------------
 # Handle user input
@@ -265,12 +257,10 @@ if submit and user_input and user_input.strip():
     st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
     st.rerun()
 
-# Find placeholder message
-placeholder_bot_index = None
-for idx, (role, txt) in enumerate(st.session_state.chat_history):
-    if role == "bot" and txt == "Generating answer...":
-        placeholder_bot_index = idx
-        break
+# ---------------------------
+# Handle chatbot response
+# ---------------------------
+placeholder_bot_index = next((i for i, (r, m) in enumerate(st.session_state.chat_history) if r == "bot" and m == "Generating answer..."), None)
 
 if placeholder_bot_index is not None:
     loading_box = st.empty()
@@ -288,17 +278,17 @@ if placeholder_bot_index is not None:
                 <p style="font-size:16px;">{next(messages)}</p>
             </div>
         """, unsafe_allow_html=True)
-        time.sleep(1.6)
+        time.sleep(1.2)
 
-    if st.session_state.vectordb is None:
-        answer = "Embeddings not ready. Please upload a PDF and wait for processing."
-        docs = []
-    else:
-        try:
-            answer, docs = ask_question(user_input, st.session_state.vectordb)
-        except Exception as e:
-            answer = f"Error while querying the document: {e}"
+    try:
+        if st.session_state.vectordb is None:
+            answer = "Embeddings not ready. Please upload a PDF and wait for processing."
             docs = []
+        else:
+            answer, docs = ask_question(user_input, st.session_state.vectordb)
+    except Exception as e:
+        answer = f"Error while querying the document: {e}"
+        docs = []
 
     st.session_state.chat_history[placeholder_bot_index] = ("bot", answer)
     loading_box.empty()
@@ -331,4 +321,3 @@ st.markdown("""
     🤖 Powered by DocMind • Made with 💜 by Ayush Mishra ✨
 </div>
 """, unsafe_allow_html=True)
-
