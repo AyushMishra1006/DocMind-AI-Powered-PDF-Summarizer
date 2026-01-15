@@ -2,7 +2,10 @@
 import streamlit as st
 from pdf_utils import upload_and_extract_pdf
 from embeddings_utils import create_embeddings
+
 from llm_utils import ask_question
+from pdf_utils import upload_and_extract_file
+
 import time
 import itertools
 import hashlib
@@ -124,7 +127,7 @@ st.markdown("""
 # ---------------------------
 st.sidebar.header("📄 Upload PDF")
 with st.sidebar:
-    pdf_text = upload_and_extract_pdf()
+    pdf_text = upload_and_extract_file()
     st.markdown(
         """
         <div style="text-align:center; margin-top:24px; color:#a020f0; font-weight:bold;">
