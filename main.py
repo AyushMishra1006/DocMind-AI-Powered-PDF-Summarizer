@@ -7,90 +7,100 @@ from embeddings_utils import create_embeddings
 from llm_utils import ask_question
 from question_suggestions import generate_smart_questions
 
-# ---------------------------
-# Page configuration
-# ---------------------------
+# -------------------------------------------------
+# Page config
+# -------------------------------------------------
 st.set_page_config(
     page_title="DocMind – Document Intelligence",
     page_icon="🤖",
     layout="wide"
 )
 
-# ---------------------------
-# GLOBAL CSS (PURPLE THEME)
-# ---------------------------
+# -------------------------------------------------
+# GLOBAL CSS (BLACK + WHITE, SUBTLE PURPLE)
+# -------------------------------------------------
 st.markdown("""
 <style>
 :root {
-    --primary: #a020f0;
-    --secondary: #4b0082;
-    --accent: #d28cff;
-    --background: #0b0014;
+    --accent: #a020f0;
+    --accent-soft: rgba(160,32,240,0.35);
+    --bg-main: #000000;
+    --bg-soft: #0f0f0f;
+    --border-soft: rgba(255,255,255,0.12);
 }
 
+/* Background */
 .stApp {
-    background: radial-gradient(circle at top, #1a0028, var(--background));
+    background: radial-gradient(circle at top, #141414, #000000);
     color: white;
     min-height: 100vh;
 }
 
-/* Main title */
+/* Title */
 .main-title {
-    color: var(--accent);
-    font-size: 44px;
-    font-weight: 800;
     text-align: center;
-    padding: 16px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #1a0028, #4b0082);
-    box-shadow: 0 0 25px rgba(160,32,240,0.4);
-    margin-bottom: 25px;
+    font-size: 42px;
+    font-weight: 800;
+    padding: 14px;
+    margin-bottom: 24px;
+    border-radius: 14px;
+    background: #0f0f0f;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 18px var(--accent-soft);
+    color: white;
 }
 
-/* Suggested questions container */
+/* Sidebar card */
+.sidebar-card {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #0f0f0f;
+    border: 1px solid var(--border-soft);
+}
+
+/* Suggested questions box */
 .suggestion-box {
-    margin-top: 10px;
-    padding: 18px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #1a0028, #4b0082);
-    box-shadow: 0 0 20px rgba(160,32,240,0.35);
+    margin-top: 14px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #0f0f0f;
+    border: 1px solid var(--border-soft);
 }
 
 /* Suggestion buttons */
-.stButton>button {
+.stButton > button {
     width: 100%;
-    background: linear-gradient(135deg, #a020f0, #d28cff);
-    color: black;
+    background: #121212;
+    color: white;
     border-radius: 999px;
     padding: 12px 18px;
-    font-weight: 700;
-    border: none;
-    transition: all 0.25s ease;
+    font-weight: 600;
+    border: 1px solid var(--accent);
+    transition: all 0.2s ease;
 }
 
-.stButton>button:hover {
-    transform: scale(1.04);
-    box-shadow: 0 0 14px rgba(210,140,255,0.7);
+.stButton > button:hover {
+    background: var(--accent);
+    color: black;
+    box-shadow: 0 0 12px var(--accent-soft);
 }
 
 /* Chat bubbles */
 .user-msg {
-    background: linear-gradient(135deg, #a020f0, #d28cff);
-    color: black;
+    background: #181818;
+    border-left: 4px solid var(--accent);
     padding: 12px 16px;
-    border-radius: 18px 18px 18px 4px;
+    border-radius: 14px;
     max-width: 75%;
-    font-weight: 600;
     margin-bottom: 8px;
 }
 
 .bot-msg {
-    background: linear-gradient(135deg, #4b0082, #1a0028);
-    color: white;
+    background: #101010;
+    border-right: 4px solid var(--accent);
     padding: 14px 18px;
-    border-radius: 18px 18px 4px 18px;
-    border: 1px solid #a020f0;
-    box-shadow: 0 0 10px rgba(160,32,240,0.35);
+    border-radius: 14px;
     max-width: 75%;
     margin-bottom: 8px;
 }
@@ -98,49 +108,43 @@ st.markdown("""
 /* Footer */
 .footer {
     text-align: center;
-    color: var(--accent);
-    font-weight: 700;
+    color: #bbbbbb;
+    font-weight: 600;
     margin-top: 30px;
     padding: 15px;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------
+# -------------------------------------------------
 # SIDEBAR
-# ---------------------------
+# -------------------------------------------------
 st.sidebar.header("📄 Upload Document")
 document_text = upload_and_extract_file()
 
 st.sidebar.markdown("""
-<div style="
-    margin-top: 25px;
-    padding: 16px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #1a0028, #4b0082);
-    box-shadow: 0 0 18px rgba(160,32,240,0.35);
-">
-    <h4 style="color:#d28cff;">🧠 DocMind Intelligence</h4>
-    <ul style="color:white; font-size:14px;">
-        <li>📄 PDF & Image Support</li>
-        <li>🔍 OCR for Scanned Docs</li>
-        <li>🧠 Smart Questions</li>
-        <li>⚡ Gemini-Powered Answers</li>
+<div class="sidebar-card">
+    <h4 style="color:#cfa7ff;">🧠 DocMind</h4>
+    <ul style="font-size:14px;">
+        <li>PDF & Image support</li>
+        <li>OCR for scanned documents</li>
+        <li>Smart question suggestions</li>
+        <li>Gemini-powered answers</li>
     </ul>
 </div>
 """, unsafe_allow_html=True)
 
-# ---------------------------
+# -------------------------------------------------
 # TITLE
-# ---------------------------
+# -------------------------------------------------
 st.markdown(
     '<div class="main-title">🤖 DocMind – Document Intelligence Assistant</div>',
     unsafe_allow_html=True
 )
 
-# ---------------------------
+# -------------------------------------------------
 # SESSION STATE
-# ---------------------------
+# -------------------------------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
@@ -153,9 +157,9 @@ if "doc_hash" not in st.session_state:
 if "suggested_questions" not in st.session_state:
     st.session_state.suggested_questions = []
 
-# ---------------------------
+# -------------------------------------------------
 # HASH UTILITY
-# ---------------------------
+# -------------------------------------------------
 def compute_hash(text):
     if not text:
         return None
@@ -164,9 +168,9 @@ def compute_hash(text):
 current_hash = compute_hash(document_text)
 is_new_upload = current_hash and current_hash != st.session_state.doc_hash
 
-# ---------------------------
+# -------------------------------------------------
 # PROCESS DOCUMENT
-# ---------------------------
+# -------------------------------------------------
 if is_new_upload:
     st.session_state.chat_history = []
     st.session_state.doc_hash = current_hash
@@ -180,15 +184,15 @@ if is_new_upload:
             persist_dir=None
         )
 
-        # 🔥 ONLY 4 SMART QUESTIONS
+        # EXACTLY 4 suggestions
         st.session_state.suggested_questions = generate_smart_questions(
             document_text,
             max_questions=4
         )
 
-# ---------------------------
-# SUGGESTED QUESTIONS (2x2 GRID)
-# ---------------------------
+# -------------------------------------------------
+# SUGGESTED QUESTIONS (2×2 GRID)
+# -------------------------------------------------
 if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
     st.markdown("### 💡 Suggested Questions")
@@ -197,8 +201,7 @@ if st.session_state.suggested_questions:
     col1, col2 = st.columns(2)
 
     for i, question in enumerate(q):
-        target_col = col1 if i % 2 == 0 else col2
-        with target_col:
+        with (col1 if i % 2 == 0 else col2):
             if st.button(question, key=f"suggest_{i}"):
                 st.session_state.chat_history.insert(0, ("user", question))
                 st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
@@ -206,9 +209,9 @@ if st.session_state.suggested_questions:
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-# ---------------------------
+# -------------------------------------------------
 # USER INPUT
-# ---------------------------
+# -------------------------------------------------
 with st.form("question_form", clear_on_submit=True):
     user_question = st.text_input("Ask a question about the document")
     submitted = st.form_submit_button("Send")
@@ -218,9 +221,9 @@ if submitted and user_question:
     st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
     st.rerun()
 
-# ---------------------------
+# -------------------------------------------------
 # ANSWER GENERATION
-# ---------------------------
+# -------------------------------------------------
 placeholder_index = next(
     (i for i, (r, t) in enumerate(st.session_state.chat_history)
      if r == "bot" and t == "Generating answer..."),
@@ -236,9 +239,9 @@ if placeholder_index is not None:
     st.session_state.chat_history[placeholder_index] = ("bot", answer)
     st.rerun()
 
-# ---------------------------
+# -------------------------------------------------
 # CHAT RENDER
-# ---------------------------
+# -------------------------------------------------
 if document_text:
     for role, msg in st.session_state.chat_history:
         css = "user-msg" if role == "user" else "bot-msg"
@@ -246,9 +249,9 @@ if document_text:
 else:
     st.info("📄 Upload a document to get started")
 
-# ---------------------------
+# -------------------------------------------------
 # FOOTER
-# ---------------------------
+# -------------------------------------------------
 st.markdown(
     '<div class="footer">🤖 Powered by DocMind • Built by Ayush Mishra ✨</div>',
     unsafe_allow_html=True
