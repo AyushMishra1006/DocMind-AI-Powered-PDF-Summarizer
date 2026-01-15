@@ -1,10 +1,10 @@
 # llm_utils.py
+import os
 import google.generativeai as genai
 from embeddings_utils import create_embeddings
 
-# NOTE: Move this to env vars before public deployment
-API_KEY = "AIzaSyCoXqTwt-TMkANV9Y66ptoc8rdEbcZqvMU"
-genai.configure(api_key=API_KEY)
+# Read key from environment (Streamlit / local)
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
