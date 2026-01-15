@@ -17,26 +17,29 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# GLOBAL CSS (BLACK + WHITE, SUBTLE PURPLE)
+# GLOBAL CSS (BLACK + STAR TEXTURE + SUBTLE PURPLE)
 # -------------------------------------------------
 st.markdown("""
 <style>
 :root {
     --accent: #a020f0;
     --accent-soft: rgba(160,32,240,0.35);
-    --bg-main: #000000;
     --bg-soft: #0f0f0f;
     --border-soft: rgba(255,255,255,0.12);
 }
 
-/* Background */
+/* App background with stars */
 .stApp {
-    background: radial-gradient(circle at top, #141414, #000000);
+    background-color: black;
+    background-image: 
+        radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 40%),
+        url("https://www.transparenttextures.com/patterns/stardust.png");
+    background-size: cover;
     color: white;
     min-height: 100vh;
 }
 
-/* Title */
+/* Main title */
 .main-title {
     text-align: center;
     font-size: 42px;
@@ -47,16 +50,18 @@ st.markdown("""
     background: #0f0f0f;
     border: 1px solid var(--accent);
     box-shadow: 0 0 18px var(--accent-soft);
-    color: white;
 }
 
-/* Sidebar card */
-.sidebar-card {
+/* Sidebar console */
+.sidebar-console {
     margin-top: 20px;
     padding: 16px;
     border-radius: 14px;
     background: #0f0f0f;
     border: 1px solid var(--border-soft);
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 /* Suggested questions box */
@@ -123,14 +128,12 @@ st.sidebar.header("📄 Upload Document")
 document_text = upload_and_extract_file()
 
 st.sidebar.markdown("""
-<div class="sidebar-card">
-    <h4 style="color:#cfa7ff;">🧠 DocMind</h4>
-    <ul style="font-size:14px;">
-        <li>PDF & Image support</li>
-        <li>OCR for scanned documents</li>
-        <li>Smart question suggestions</li>
-        <li>Gemini-powered answers</li>
-    </ul>
+<div class="sidebar-console">
+▸ STATUS   : READY<br>
+▸ MODE     : DOCUMENT INTELLIGENCE<br>
+▸ INPUT    : PDF / IMAGE<br>
+▸ ENGINE   : OCR + GEMINI<br>
+▸ STATE    : AWAITING QUERY
 </div>
 """, unsafe_allow_html=True)
 
@@ -184,7 +187,6 @@ if is_new_upload:
             persist_dir=None
         )
 
-        # EXACTLY 4 suggestions
         st.session_state.suggested_questions = generate_smart_questions(
             document_text,
             max_questions=4
