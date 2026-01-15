@@ -1,6 +1,5 @@
 # main.py
 import streamlit as st
-from pdf_utils import upload_and_extract_pdf
 from embeddings_utils import create_embeddings
 
 from llm_utils import ask_question
