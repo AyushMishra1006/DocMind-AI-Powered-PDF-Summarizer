@@ -37,7 +37,7 @@ if not st.session_state.app_loaded:
         flex-direction: column;
         z-index: 9999;
         animation: fadeOut 0.6s ease-out forwards;
-        animation-delay: 1.2s;
+        animation-delay: 3.0    s;
     }
 
     @keyframes fadeOut {
