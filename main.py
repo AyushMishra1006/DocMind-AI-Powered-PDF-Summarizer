@@ -17,39 +17,94 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# GLOBAL CSS (BLACK + STAR TEXTURE + SUBTLE PURPLE)
+# GLOBAL CSS (LOCKED DARK THEME + STARS)
 # -------------------------------------------------
 st.markdown("""
 <style>
 :root {
     --accent: #a020f0;
     --accent-soft: rgba(160,32,240,0.35);
+    --bg-main: #000000;
     --bg-soft: #0f0f0f;
-    --border-soft: rgba(255,255,255,0.12);
+    --bg-widget: #121212;
+    --border-soft: rgba(255,255,255,0.15);
+    --text-main: #ffffff;
+    --text-muted: #cccccc;
 }
 
-/* App background with stars */
+/* App background */
 .stApp {
-    background-color: black;
-    background-image: 
+    background-color: black !important;
+    background-image:
         radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 40%),
         url("https://www.transparenttextures.com/patterns/stardust.png");
     background-size: cover;
-    color: white;
-    min-height: 100vh;
+    color: var(--text-main) !important;
 }
 
-/* Main title */
+/* Remove Streamlit top bar */
+header, .stToolbar {
+    background: black !important;
+    box-shadow: none !important;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background: #0b0b0b !important;
+    border-right: 1px solid var(--border-soft);
+}
+
+/* File uploader */
+[data-testid="stFileUploader"] {
+    background: var(--bg-soft) !important;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+}
+[data-testid="stFileUploader"] * {
+    color: var(--text-main) !important;
+}
+
+/* Text inputs */
+input, textarea {
+    background-color: var(--bg-widget) !important;
+    color: var(--text-main) !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-soft) !important;
+}
+input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+/* Buttons */
+button {
+    background-color: var(--bg-widget) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: 999px !important;
+    padding: 10px 18px !important;
+    font-weight: 600;
+}
+button:hover {
+    background-color: var(--accent) !important;
+    color: black !important;
+}
+
+/* Labels & text */
+label, .stMarkdown {
+    color: var(--text-main) !important;
+}
+
+/* Title */
 .main-title {
-    text-align: center;
-    font-size: 42px;
-    font-weight: 800;
-    padding: 14px;
-    margin-bottom: 24px;
-    border-radius: 14px;
-    background: #0f0f0f;
+    background: #0f0f0f !important;
     border: 1px solid var(--accent);
     box-shadow: 0 0 18px var(--accent-soft);
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 42px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 24px;
 }
 
 /* Sidebar console */
@@ -64,31 +119,13 @@ st.markdown("""
     line-height: 1.6;
 }
 
-/* Suggested questions box */
+/* Suggestions box */
 .suggestion-box {
     margin-top: 14px;
     padding: 16px;
     border-radius: 14px;
     background: #0f0f0f;
     border: 1px solid var(--border-soft);
-}
-
-/* Suggestion buttons */
-.stButton > button {
-    width: 100%;
-    background: #121212;
-    color: white;
-    border-radius: 999px;
-    padding: 12px 18px;
-    font-weight: 600;
-    border: 1px solid var(--accent);
-    transition: all 0.2s ease;
-}
-
-.stButton > button:hover {
-    background: var(--accent);
-    color: black;
-    box-shadow: 0 0 12px var(--accent-soft);
 }
 
 /* Chat bubbles */
@@ -100,7 +137,6 @@ st.markdown("""
     max-width: 75%;
     margin-bottom: 8px;
 }
-
 .bot-msg {
     background: #101010;
     border-right: 4px solid var(--accent);
@@ -150,18 +186,15 @@ st.markdown(
 # -------------------------------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
-
 if "vectordb" not in st.session_state:
     st.session_state.vectordb = None
-
 if "doc_hash" not in st.session_state:
     st.session_state.doc_hash = None
-
 if "suggested_questions" not in st.session_state:
     st.session_state.suggested_questions = []
 
 # -------------------------------------------------
-# HASH UTILITY
+# HASH
 # -------------------------------------------------
 def compute_hash(text):
     if not text:
@@ -186,26 +219,23 @@ if is_new_upload:
             collection_name=f"docmind_{current_hash[:8]}",
             persist_dir=None
         )
-
         st.session_state.suggested_questions = generate_smart_questions(
             document_text,
             max_questions=4
         )
 
 # -------------------------------------------------
-# SUGGESTED QUESTIONS (2×2 GRID)
+# SUGGESTED QUESTIONS (2x2)
 # -------------------------------------------------
 if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
     st.markdown("### 💡 Suggested Questions")
 
-    q = st.session_state.suggested_questions
     col1, col2 = st.columns(2)
-
-    for i, question in enumerate(q):
+    for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
-            if st.button(question, key=f"suggest_{i}"):
-                st.session_state.chat_history.insert(0, ("user", question))
+            if st.button(q, key=f"suggest_{i}"):
+                st.session_state.chat_history.insert(0, ("user", q))
                 st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
                 st.rerun()
 
