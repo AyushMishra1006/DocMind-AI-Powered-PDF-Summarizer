@@ -16,6 +16,58 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
+# APP LOADING STATE
+# -------------------------------------------------
+if "app_loaded" not in st.session_state:
+    st.session_state.app_loaded = False
+
+# -------------------------------------------------
+# APP LOADING GUI (SPLASH)
+# -------------------------------------------------
+if not st.session_state.app_loaded:
+    st.markdown("""
+    <style>
+    .app-loader {
+        position: fixed;
+        inset: 0;
+        background: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 9999;
+        animation: fadeOut 0.6s ease-out forwards;
+        animation-delay: 1.2s;
+    }
+
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    .loader-text {
+        font-size: 26px;
+        font-weight: 800;
+        color: white;
+        margin-top: 18px;
+        animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    </style>
+
+    <div class="app-loader">
+        <div style="font-size:72px;">🤖</div>
+        <div class="loader-text">Loading DocMind…</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -------------------------------------------------
 # GLOBAL CSS (LOCKED DARK THEME + UPLOADER FIX + ANIMATION)
 # -------------------------------------------------
 st.markdown("""
@@ -244,7 +296,7 @@ if st.session_state.suggested_questions:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# USER INPUT (SEND INSIDE SEARCH ROW)
+# USER INPUT (SEND IN SAME ROW)
 # -------------------------------------------------
 with st.form("question_form", clear_on_submit=True):
     col1, col2 = st.columns([6, 1])
@@ -292,10 +344,14 @@ else:
     st.info("📄 Upload a document to get started")
 
 # -------------------------------------------------
+# MARK APP AS LOADED
+# -------------------------------------------------
+st.session_state.app_loaded = True
+
+# -------------------------------------------------
 # FOOTER
 # -------------------------------------------------
 st.markdown(
     '<div class="footer">🤖 Powered by DocMind • Built by Ayush Mishra ✨</div>',
     unsafe_allow_html=True
 )
-    
