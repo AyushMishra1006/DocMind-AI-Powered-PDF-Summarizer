@@ -1,4 +1,3 @@
-# main.py
 import streamlit as st
 import hashlib
 
@@ -17,7 +16,7 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# GLOBAL CSS (LOCKED DARK THEME + STARS)
+# GLOBAL CSS (LOCKED DARK THEME + FIXED UPLOADER + ANIMATION)
 # -------------------------------------------------
 st.markdown("""
 <style>
@@ -54,17 +53,40 @@ section[data-testid="stSidebar"] {
     border-right: 1px solid var(--border-soft);
 }
 
-/* File uploader */
+/* ============================= */
+/* FILE UPLOADER – HARD OVERRIDE */
+/* ============================= */
+
 [data-testid="stFileUploader"] {
-    background: var(--bg-soft) !important;
-    border-radius: 12px;
-    border: 1px solid var(--border-soft);
-}
-[data-testid="stFileUploader"] * {
-    color: var(--text-main) !important;
+    background: #0f0f0f !important;
+    border-radius: 14px !important;
+    border: 1.5px solid var(--accent) !important;
+    box-shadow: 0 0 14px var(--accent-soft);
 }
 
-/* Text inputs */
+[data-testid="stFileUploader"] section {
+    background: #0f0f0f !important;
+}
+
+[data-testid="stFileUploader"] * {
+    color: #ffffff !important;
+}
+
+[data-testid="stFileUploader"] button {
+    background: #121212 !important;
+    color: #ffffff !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: 999px !important;
+}
+
+[data-testid="stFileUploader"] small {
+    color: #cccccc !important;
+}
+
+/* ============================= */
+/* INPUTS & BUTTONS */
+/* ============================= */
+
 input, textarea {
     background-color: var(--bg-widget) !important;
     color: var(--text-main) !important;
@@ -75,7 +97,6 @@ input::placeholder {
     color: var(--text-muted) !important;
 }
 
-/* Buttons */
 button {
     background-color: var(--bg-widget) !important;
     color: var(--text-main) !important;
@@ -89,9 +110,19 @@ button:hover {
     color: black !important;
 }
 
-/* Labels & text */
-label, .stMarkdown {
-    color: var(--text-main) !important;
+/* ============================= */
+/* WAVE LOAD ANIMATION */
+/* ============================= */
+
+@keyframes waveIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Title */
@@ -105,6 +136,14 @@ label, .stMarkdown {
     font-weight: 800;
     text-align: center;
     margin-bottom: 24px;
+    animation: waveIn 0.9s ease-out forwards;
+}
+
+/* Question input appears after title */
+div[data-testid="stForm"] {
+    animation: waveIn 1.2s ease-out forwards;
+    animation-delay: 0.25s;
+    opacity: 0;
 }
 
 /* Sidebar console */
@@ -225,7 +264,7 @@ if is_new_upload:
         )
 
 # -------------------------------------------------
-# SUGGESTED QUESTIONS (2x2)
+# SUGGESTED QUESTIONS
 # -------------------------------------------------
 if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
