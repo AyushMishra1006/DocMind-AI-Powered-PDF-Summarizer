@@ -36,8 +36,8 @@ if not st.session_state.app_loaded:
         justify-content: center;
         flex-direction: column;
         z-index: 9999;
-        animation: fadeOut 0.6s ease-out forwards;
-        animation-delay: 3s;
+        animation: fadeOut 1s ease-out forwards;
+        animation-delay: 5s;
     }
 
     @keyframes fadeOut {
