@@ -286,8 +286,7 @@ if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 if "is_thinking" not in st.session_state:
     st.session_state.is_thinking = False
-if "show_input" not in st.session_state:
-    st.session_state.show_input = True
+
    
 
 
@@ -333,12 +332,12 @@ if st.session_state.suggested_questions:
     for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
             if st.button(q, key=f"suggest_{i}"):
-                st.session_state.show_input = True
                 if not st.session_state.chat_history or st.session_state.chat_history[0][1] != q:
                     st.session_state.chat_history.insert(0, ("user", q))
                     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
                     st.session_state.pending_question = q
                     st.session_state.is_thinking = True
+                    st.rerun()
                     
 
     st.markdown("</div>", unsafe_allow_html=True)
@@ -349,22 +348,19 @@ if st.session_state.suggested_questions:
 # -------------------------------------------------
 # USER INPUT (SEND IN SAME ROW)
 # -------------------------------------------------
-if st.session_state.show_input:
-    with st.form("question_form", clear_on_submit=True):
-        col1, col2 = st.columns([6, 1])
+with st.form("question_form", clear_on_submit=True):
+    col1, col2 = st.columns([6, 1])
 
-        with col1:
-            user_question = st.text_input(
-                "Ask a question about the document",
-                label_visibility="collapsed"
-            )
+    with col1:
+        user_question = st.text_input(
+            "Ask a question about the document",
+            label_visibility="collapsed",
+            key="main_input"
+        )
 
-        with col2:
-            submitted = st.form_submit_button("Send")
+    with col2:
+        submitted = st.form_submit_button("Send")
 
-else:
-    submitted = False
-    user_question = None
 if submitted and user_question:
     st.session_state.chat_history.insert(0, ("user", user_question))
     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
@@ -378,7 +374,34 @@ if submitted and user_question:
 # -------------------------------------------------
 # ANSWER GENERATION
 # -------------------------------------------------
-if st.session_state.is_thinking and st.session_state.pending_question:
+# -------------------------------------------------
+# ANSWER GENERATION
+# -------------------------------------------------
+if (
+    st.session_state.is_thinking
+    and st.session_state.pending_question
+    and st.session_state.vectordb is not None
+):
+
+    # ✅ ENGAGEMENT OVERLAY (shows during rerun)
+    st.markdown("""
+    <div style="
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(6px);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    color:white;
+    font-size:22px;
+    font-weight:700;">
+    🤖 Thinking...<br>
+    <small>Analyzing document</small>
+    </div>
+    """, unsafe_allow_html=True)
+
     answer, _ = ask_question(
         st.session_state.pending_question,
         st.session_state.vectordb
@@ -391,6 +414,9 @@ if st.session_state.is_thinking and st.session_state.pending_question:
 
     st.session_state.pending_question = None
     st.session_state.is_thinking = False
+
+    st.rerun()  # 🔥 important: removes overlay cleanly
+
     
 
     
