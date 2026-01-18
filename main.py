@@ -22,22 +22,6 @@ if "app_loaded" not in st.session_state:
     st.session_state.app_loaded = False
 
 # -------------------------------------------------
-# SESSION STATE (FIXED: added active_question + processing)
-# -------------------------------------------------
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-if "vectordb" not in st.session_state:
-    st.session_state.vectordb = None
-if "doc_hash" not in st.session_state:
-    st.session_state.doc_hash = None
-if "suggested_questions" not in st.session_state:
-    st.session_state.suggested_questions = []
-if "active_question" not in st.session_state:      # ✅ FIX 1
-    st.session_state.active_question = None
-if "processing" not in st.session_state:           # ✅ FIX 2
-    st.session_state.processing = False
-
-# -------------------------------------------------
 # APP LOADING GUI (SPLASH)
 # -------------------------------------------------
 if not st.session_state.app_loaded:
@@ -84,7 +68,7 @@ if not st.session_state.app_loaded:
     """, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# GLOBAL CSS (UNCHANGED)
+# GLOBAL CSS (LOCKED DARK THEME + UPLOADER FIX + ANIMATION)
 # -------------------------------------------------
 st.markdown("""
 <style>
@@ -98,7 +82,132 @@ st.markdown("""
     --text-main: #ffffff;
     --text-muted: #cccccc;
 }
-/* rest of your CSS unchanged */
+
+.stApp {
+    background-color: black !important;
+    background-image:
+        radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 40%),
+        url("https://www.transparenttextures.com/patterns/stardust.png");
+    background-size: cover;
+    color: var(--text-main) !important;
+}
+
+header, .stToolbar {
+    background: black !important;
+    box-shadow: none !important;
+}
+
+section[data-testid="stSidebar"] {
+    background: #0b0b0b !important;
+    border-right: 1px solid var(--border-soft);
+}
+
+[data-testid="stFileUploader"] {
+    background: #0f0f0f !important;
+    border-radius: 14px !important;
+    border: 1.5px solid var(--accent) !important;
+    box-shadow: 0 0 14px var(--accent-soft);
+}
+
+[data-testid="stFileUploader"] section {
+    background: #0f0f0f !important;
+}
+
+[data-testid="stFileUploader"] * {
+    color: #ffffff !important;
+}
+
+[data-testid="stFileUploader"] button {
+    background: #121212 !important;
+    color: #ffffff !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: 999px !important;
+}
+
+input, textarea {
+    background-color: var(--bg-widget) !important;
+    color: var(--text-main) !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-soft) !important;
+}
+
+button {
+    background-color: var(--bg-widget) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--accent) !important;
+    border-radius: 999px !important;
+    padding: 10px 18px !important;
+    font-weight: 600;
+}
+
+@keyframes waveIn {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.main-title {
+    background: #0f0f0f !important;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 18px var(--accent-soft);
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 42px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 24px;
+    animation: waveIn 0.9s ease-out forwards;
+}
+
+div[data-testid="stForm"] {
+    animation: waveIn 1.2s ease-out forwards;
+    animation-delay: 0.25s;
+    opacity: 0;
+}
+
+.sidebar-console {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #0f0f0f;
+    border: 1px solid var(--border-soft);
+    font-family: monospace;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.suggestion-box {
+    margin-top: 14px;
+    padding: 16px;
+    border-radius: 14px;
+    background: #0f0f0f;
+    border: 1px solid var(--border-soft);
+}
+
+.user-msg {
+    background: #181818;
+    border-left: 4px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 14px;
+    max-width: 75%;
+    margin-bottom: 8px;
+}
+
+.bot-msg {
+    background: #101010;
+    border-right: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 14px;
+    max-width: 75%;
+    margin-bottom: 8px;
+}
+
+.footer {
+    text-align: center;
+    color: #bbbbbb;
+    font-weight: 600;
+    margin-top: 30px;
+    padding: 15px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -108,19 +217,15 @@ st.markdown("""
 st.sidebar.header("📄 Upload Document")
 document_text = upload_and_extract_file()
 
-# ✅ FIX 3: show working status
-if st.session_state.processing:
-    st.sidebar.info("⚙️ Working… please wait")
-else:
-    st.sidebar.markdown("""
-    <div class="sidebar-console">
-    ▸ STATUS   : READY<br>
-    ▸ MODE     : DOCUMENT INTELLIGENCE<br>
-    ▸ INPUT    : PDF / IMAGE<br>
-    ▸ ENGINE   : OCR + GEMINI<br>
-    ▸ STATE    : AWAITING QUERY
-    </div>
-    """, unsafe_allow_html=True)
+st.sidebar.markdown("""
+<div class="sidebar-console">
+▸ STATUS   : READY<br>
+▸ MODE     : DOCUMENT INTELLIGENCE<br>
+▸ INPUT    : PDF / IMAGE<br>
+▸ ENGINE   : OCR + GEMINI<br>
+▸ STATE    : AWAITING QUERY
+</div>
+""", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # TITLE
@@ -129,6 +234,18 @@ st.markdown(
     '<div class="main-title">🤖 DocMind – Document Intelligence Assistant</div>',
     unsafe_allow_html=True
 )
+
+# -------------------------------------------------
+# SESSION STATE
+# -------------------------------------------------
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+if "vectordb" not in st.session_state:
+    st.session_state.vectordb = None
+if "doc_hash" not in st.session_state:
+    st.session_state.doc_hash = None
+if "suggested_questions" not in st.session_state:
+    st.session_state.suggested_questions = []
 
 # -------------------------------------------------
 # HASH
@@ -145,7 +262,6 @@ is_new_upload = current_hash and current_hash != st.session_state.doc_hash
 # PROCESS DOCUMENT
 # -------------------------------------------------
 if is_new_upload:
-    st.session_state.processing = True   # ✅ FIX
     st.session_state.chat_history = []
     st.session_state.doc_hash = current_hash
     st.session_state.vectordb = None
@@ -162,10 +278,8 @@ if is_new_upload:
             max_questions=4
         )
 
-    st.session_state.processing = False  # ✅ FIX
-
 # -------------------------------------------------
-# SUGGESTED QUESTIONS (FIXED DUPLICATE BUG)
+# SUGGESTED QUESTIONS
 # -------------------------------------------------
 if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
@@ -174,8 +288,7 @@ if st.session_state.suggested_questions:
     col1, col2 = st.columns(2)
     for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
-            if st.button(q, key=f"suggest_{i}") and st.session_state.active_question is None:
-                st.session_state.active_question = q  # ✅ LOCK
+            if st.button(q, key=f"suggest_{i}"):
                 st.session_state.chat_history.insert(0, ("user", q))
                 st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
                 st.rerun()
@@ -183,7 +296,7 @@ if st.session_state.suggested_questions:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# USER INPUT (UNCHANGED)
+# USER INPUT (SEND IN SAME ROW)
 # -------------------------------------------------
 with st.form("question_form", clear_on_submit=True):
     col1, col2 = st.columns([6, 1])
@@ -198,7 +311,6 @@ with st.form("question_form", clear_on_submit=True):
         submitted = st.form_submit_button("Send")
 
 if submitted and user_question:
-    st.session_state.active_question = user_question  # ✅ LOCK
     st.session_state.chat_history.insert(0, ("user", user_question))
     st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
     st.rerun()
@@ -213,15 +325,12 @@ placeholder_index = next(
 )
 
 if placeholder_index is not None:
-    st.session_state.processing = True  # ✅ FIX
     with st.spinner("🤖 Thinking..."):
         answer, _ = ask_question(
             st.session_state.chat_history[placeholder_index - 1][1],
             st.session_state.vectordb
         )
     st.session_state.chat_history[placeholder_index] = ("bot", answer)
-    st.session_state.active_question = None  # ✅ UNLOCK
-    st.session_state.processing = False      # ✅ FIX
     st.rerun()
 
 # -------------------------------------------------
