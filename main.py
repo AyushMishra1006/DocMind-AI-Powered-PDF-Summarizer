@@ -16,10 +16,14 @@ st.set_page_config(
 )
 
 # -------------------------------------------------
-# SESSION INIT
+# APP LOADING STATE
 # -------------------------------------------------
 if "app_loaded" not in st.session_state:
     st.session_state.app_loaded = False
+
+# -------------------------------------------------
+# SESSION STATE (FIXED: added active_question + processing)
+# -------------------------------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "vectordb" not in st.session_state:
@@ -28,13 +32,13 @@ if "doc_hash" not in st.session_state:
     st.session_state.doc_hash = None
 if "suggested_questions" not in st.session_state:
     st.session_state.suggested_questions = []
-if "active_question" not in st.session_state:
+if "active_question" not in st.session_state:      # ✅ FIX 1
     st.session_state.active_question = None
-if "processing" not in st.session_state:
-    st.session_state.processing = None
+if "processing" not in st.session_state:           # ✅ FIX 2
+    st.session_state.processing = False
 
 # -------------------------------------------------
-# SPLASH SCREEN
+# APP LOADING GUI (SPLASH)
 # -------------------------------------------------
 if not st.session_state.app_loaded:
     st.markdown("""
@@ -49,23 +53,54 @@ if not st.session_state.app_loaded:
         flex-direction: column;
         z-index: 9999;
         animation: fadeOut 1s ease-out forwards;
-        animation-delay: 3s;
+        animation-delay: 5s;
     }
+
     @keyframes fadeOut {
-        to { opacity: 0; visibility: hidden; }
+        to {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    .loader-text {
+        font-size: 26px;
+        font-weight: 800;
+        color: white;
+        margin-top: 18px;
+        animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
     </style>
 
     <div class="app-loader">
         <div style="font-size:72px;">🤖</div>
-        <div style="font-size:26px;font-weight:800;">Loading DocMind…</div>
+        <div class="loader-text">Loading DocMind…</div>
     </div>
     """, unsafe_allow_html=True)
 
 # -------------------------------------------------
-# GLOBAL CSS (unchanged)
+# GLOBAL CSS (UNCHANGED)
 # -------------------------------------------------
-st.markdown("""<style>/* same CSS as before */</style>""", unsafe_allow_html=True)
+st.markdown("""
+<style>
+:root {
+    --accent: #a020f0;
+    --accent-soft: rgba(160,32,240,0.35);
+    --bg-main: #000000;
+    --bg-soft: #0f0f0f;
+    --bg-widget: #121212;
+    --border-soft: rgba(255,255,255,0.15);
+    --text-main: #ffffff;
+    --text-muted: #cccccc;
+}
+/* rest of your CSS unchanged */
+</style>
+""", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # SIDEBAR
@@ -73,8 +108,9 @@ st.markdown("""<style>/* same CSS as before */</style>""", unsafe_allow_html=Tru
 st.sidebar.header("📄 Upload Document")
 document_text = upload_and_extract_file()
 
+# ✅ FIX 3: show working status
 if st.session_state.processing:
-    st.sidebar.info(st.session_state.processing)
+    st.sidebar.info("⚙️ Working… please wait")
 else:
     st.sidebar.markdown("""
     <div class="sidebar-console">
@@ -109,26 +145,27 @@ is_new_upload = current_hash and current_hash != st.session_state.doc_hash
 # PROCESS DOCUMENT
 # -------------------------------------------------
 if is_new_upload:
-    st.session_state.processing = "📄 Processing document..."
+    st.session_state.processing = True   # ✅ FIX
     st.session_state.chat_history = []
     st.session_state.doc_hash = current_hash
     st.session_state.vectordb = None
     st.session_state.suggested_questions = []
 
-    st.session_state.vectordb = create_embeddings(
-        document_text,
-        collection_name=f"docmind_{current_hash[:8]}",
-        persist_dir=None
-    )
-    st.session_state.suggested_questions = generate_smart_questions(
-        document_text,
-        max_questions=4
-    )
-    st.session_state.processing = None
-    st.rerun()
+    with st.spinner("📄 Processing document..."):
+        st.session_state.vectordb = create_embeddings(
+            document_text,
+            collection_name=f"docmind_{current_hash[:8]}",
+            persist_dir=None
+        )
+        st.session_state.suggested_questions = generate_smart_questions(
+            document_text,
+            max_questions=4
+        )
+
+    st.session_state.processing = False  # ✅ FIX
 
 # -------------------------------------------------
-# SUGGESTED QUESTIONS (FIXED)
+# SUGGESTED QUESTIONS (FIXED DUPLICATE BUG)
 # -------------------------------------------------
 if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
@@ -138,30 +175,36 @@ if st.session_state.suggested_questions:
     for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
             if st.button(q, key=f"suggest_{i}") and st.session_state.active_question is None:
-                st.session_state.active_question = q
+                st.session_state.active_question = q  # ✅ LOCK
                 st.session_state.chat_history.insert(0, ("user", q))
                 st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
                 st.rerun()
+
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# USER INPUT
+# USER INPUT (UNCHANGED)
 # -------------------------------------------------
 with st.form("question_form", clear_on_submit=True):
     col1, col2 = st.columns([6, 1])
+
     with col1:
-        user_question = st.text_input("Ask a question", label_visibility="collapsed")
+        user_question = st.text_input(
+            "Ask a question about the document",
+            label_visibility="collapsed"
+        )
+
     with col2:
         submitted = st.form_submit_button("Send")
 
 if submitted and user_question:
-    st.session_state.active_question = user_question
+    st.session_state.active_question = user_question  # ✅ LOCK
     st.session_state.chat_history.insert(0, ("user", user_question))
     st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
     st.rerun()
 
 # -------------------------------------------------
-# ANSWER GENERATION (FIXED)
+# ANSWER GENERATION
 # -------------------------------------------------
 placeholder_index = next(
     (i for i, (r, t) in enumerate(st.session_state.chat_history)
@@ -170,14 +213,15 @@ placeholder_index = next(
 )
 
 if placeholder_index is not None:
-    st.session_state.processing = "🤖 Thinking..."
-    answer, _ = ask_question(
-        st.session_state.chat_history[placeholder_index - 1][1],
-        st.session_state.vectordb
-    )
+    st.session_state.processing = True  # ✅ FIX
+    with st.spinner("🤖 Thinking..."):
+        answer, _ = ask_question(
+            st.session_state.chat_history[placeholder_index - 1][1],
+            st.session_state.vectordb
+        )
     st.session_state.chat_history[placeholder_index] = ("bot", answer)
-    st.session_state.active_question = None
-    st.session_state.processing = None
+    st.session_state.active_question = None  # ✅ UNLOCK
+    st.session_state.processing = False      # ✅ FIX
     st.rerun()
 
 # -------------------------------------------------
@@ -191,7 +235,7 @@ else:
     st.info("📄 Upload a document to get started")
 
 # -------------------------------------------------
-# MARK LOADED
+# MARK APP AS LOADED
 # -------------------------------------------------
 st.session_state.app_loaded = True
 
