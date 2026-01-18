@@ -218,21 +218,28 @@ div[data-testid="stButton"] > button:hover {
     box-shadow: 0 0 16px var(--accent) !important;
     transform: scale(1.04);
     transition: all 0.15s ease-in-out;
+}
             
 /* ============================
    SEARCH BOX PURPLE FOCUS
 ============================= */
-input:focus,
-textarea:focus {
-    border: 1.5px solid var(--accent) !important;
-    box-shadow: 0 0 14px var(--accent-soft) !important;
+div[data-testid="stTextInput"] input:focus {
+    border: 2px solid var(--accent) !important;
+    box-shadow: 0 0 18px var(--accent-soft) !important;
     outline: none !important;
+
+
 }
 input, textarea {
     transition: all 0.15s ease-in-out;
 }
-
+div[data-testid="stTextInput"] input:not(:placeholder-shown) {
+    box-shadow: 0 0 16px var(--accent-soft) !important;
+    border: 1.5px solid var(--accent) !important;
 }
+
+
+
           
 
 
@@ -328,7 +335,7 @@ if st.session_state.suggested_questions:
                     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
                     st.session_state.pending_question = q
                     st.session_state.is_thinking = True
-                    st.rerun()
+                    
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -353,7 +360,7 @@ if submitted and user_question:
 
     st.session_state.pending_question = user_question
     st.session_state.is_thinking = True
-    st.rerun()
+    
 
     
 
@@ -373,7 +380,7 @@ if st.session_state.is_thinking and st.session_state.pending_question:
 
     st.session_state.pending_question = None
     st.session_state.is_thinking = False
-    st.rerun()
+    
 
     
 
