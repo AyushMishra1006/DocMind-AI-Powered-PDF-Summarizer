@@ -235,6 +235,29 @@ div[data-testid="stTextInput"] input:not(:placeholder-shown) {
     box-shadow: 0 0 16px var(--accent-soft) !important;
     border: 1.5px solid var(--accent) !important;
 }
+.chat-container {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    padding-bottom: 120px;
+}
+
+/* sticky input bar */
+.input-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000000;
+    padding: 16px 24px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    z-index: 999;
+}
+
+/* prevent footer overlap */
+footer {
+    display: none;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -332,8 +355,25 @@ if st.session_state.suggested_questions:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
-# USER INPUT (SEND IN SAME ROW)
+# CHAT RENDER
 # -------------------------------------------------
+st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+
+if document_text:
+    for role, msg in st.session_state.chat_history:
+        css = "user-msg" if role == "user" else "bot-msg"
+        st.markdown(f'<div class="{css}">{msg}</div>', unsafe_allow_html=True)
+else:
+    st.info("📄 Upload a document to get started")
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# -------------------------------------------------
+# FIXED INPUT BAR (CHATGPT STYLE)
+# -------------------------------------------------
+st.markdown('<div class="input-bar">', unsafe_allow_html=True)
+
 if st.session_state.show_input:
     with st.form("question_form", clear_on_submit=True):
         col1, col2 = st.columns([6, 1])
@@ -346,16 +386,21 @@ if st.session_state.show_input:
 
         with col2:
             submitted = st.form_submit_button("Send")
-
 else:
     submitted = False
     user_question = None
 
+st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------------------------------------
+# SUBMIT HANDLER
+# -------------------------------------------------
 if submitted and user_question:
     st.session_state.chat_history.insert(0, ("user", user_question))
     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
     st.session_state.pending_question = user_question
     st.session_state.is_thinking = True
+
 
 # -------------------------------------------------
 # ANSWER GENERATION
@@ -374,15 +419,7 @@ if st.session_state.is_thinking and st.session_state.pending_question:
     st.session_state.pending_question = None
     st.session_state.is_thinking = False
 
-# -------------------------------------------------
-# CHAT RENDER
-# -------------------------------------------------
-if document_text:
-    for role, msg in st.session_state.chat_history:
-        css = "user-msg" if role == "user" else "bot-msg"
-        st.markdown(f'<div class="{css}">{msg}</div>', unsafe_allow_html=True)
-else:
-    st.info("📄 Upload a document to get started")
+
 
 # -------------------------------------------------
 # MARK APP AS LOADED
