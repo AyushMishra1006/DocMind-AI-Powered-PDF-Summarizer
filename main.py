@@ -218,6 +218,20 @@ div[data-testid="stButton"] > button:hover {
     box-shadow: 0 0 16px var(--accent) !important;
     transform: scale(1.04);
     transition: all 0.15s ease-in-out;
+            
+/* ============================
+   SEARCH BOX PURPLE FOCUS
+============================= */
+input:focus,
+textarea:focus {
+    border: 1.5px solid var(--accent) !important;
+    box-shadow: 0 0 14px var(--accent-soft) !important;
+    outline: none !important;
+}
+input, textarea {
+    transition: all 0.15s ease-in-out;
+}
+
 }
           
 
@@ -305,14 +319,16 @@ if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
     st.markdown("### 💡 Suggested Questions")
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)  
     for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
             if st.button(q, key=f"suggest_{i}"):
                 if not st.session_state.chat_history or st.session_state.chat_history[0][1] != q:
                     st.session_state.chat_history.insert(0, ("user", q))
-                    st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
-                
+                    st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
+                    st.session_state.pending_question = q
+                    st.session_state.is_thinking = True
+                    st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
 
