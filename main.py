@@ -286,6 +286,9 @@ if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 if "is_thinking" not in st.session_state:
     st.session_state.is_thinking = False
+if "show_input" not in st.session_state:
+    st.session_state.show_input = True
+   
 
 
 # -------------------------------------------------
@@ -330,6 +333,7 @@ if st.session_state.suggested_questions:
     for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
             if st.button(q, key=f"suggest_{i}"):
+                st.session_state.show_input = True
                 if not st.session_state.chat_history or st.session_state.chat_history[0][1] != q:
                     st.session_state.chat_history.insert(0, ("user", q))
                     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
@@ -342,24 +346,31 @@ if st.session_state.suggested_questions:
 # -------------------------------------------------
 # USER INPUT (SEND IN SAME ROW)
 # -------------------------------------------------
-with st.form("question_form", clear_on_submit=True):
-    col1, col2 = st.columns([6, 1])
+# -------------------------------------------------
+# USER INPUT (SEND IN SAME ROW)
+# -------------------------------------------------
+if st.session_state.show_input:
+    with st.form("question_form", clear_on_submit=True):
+        col1, col2 = st.columns([6, 1])
 
-    with col1:
-        user_question = st.text_input(
-            "Ask a question about the document",
-            label_visibility="collapsed"
-        )
+        with col1:
+            user_question = st.text_input(
+                "Ask a question about the document",
+                label_visibility="collapsed"
+            )
 
-    with col2:
-        submitted = st.form_submit_button("Send")
+        with col2:
+            submitted = st.form_submit_button("Send")
 
+else:
+    submitted = False
+    user_question = None
 if submitted and user_question:
     st.session_state.chat_history.insert(0, ("user", user_question))
     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
-
     st.session_state.pending_question = user_question
     st.session_state.is_thinking = True
+
     
 
     
