@@ -208,6 +208,21 @@ div[data-testid="stForm"] {
     margin-top: 30px;
     padding: 15px;
 }
+/* ============================
+   BUTTON HOVER EFFECT (PURPLE)
+============================= */
+button:hover,
+div[data-testid="stButton"] > button:hover {
+    background: var(--accent) !important;
+    color: black !important;
+    box-shadow: 0 0 16px var(--accent) !important;
+    transform: scale(1.04);
+    transition: all 0.15s ease-in-out;
+}
+          
+
+
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -246,6 +261,11 @@ if "doc_hash" not in st.session_state:
     st.session_state.doc_hash = None
 if "suggested_questions" not in st.session_state:
     st.session_state.suggested_questions = []
+if "pending_question" not in st.session_state:
+    st.session_state.pending_question = None
+if "is_thinking" not in st.session_state:
+    st.session_state.is_thinking = False
+
 
 # -------------------------------------------------
 # HASH
@@ -313,25 +333,32 @@ with st.form("question_form", clear_on_submit=True):
 
 if submitted and user_question:
     st.session_state.chat_history.insert(0, ("user", user_question))
-    st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
+    st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
+
+    st.session_state.pending_question = user_question
+    st.session_state.is_thinking = True
+    st.rerun()
+
     
 
 # -------------------------------------------------
 # ANSWER GENERATION
 # -------------------------------------------------
-placeholder_index = next(
-    (i for i, (r, t) in enumerate(st.session_state.chat_history)
-     if r == "bot" and t == "Generating answer..."),
-    None
-)
+if st.session_state.is_thinking and st.session_state.pending_question:
+    answer, _ = ask_question(
+        st.session_state.pending_question,
+        st.session_state.vectordb
+    )
 
-if placeholder_index is not None:
-    with st.spinner("🤖 Thinking..."):
-        answer, _ = ask_question(
-            st.session_state.chat_history[placeholder_index - 1][1],
-            st.session_state.vectordb
-        )
-    st.session_state.chat_history[placeholder_index] = ("bot", answer)
+    for i, (r, t) in enumerate(st.session_state.chat_history):
+        if r == "bot" and "Thinking…" in t:
+            st.session_state.chat_history[i] = ("bot", answer)
+            break
+
+    st.session_state.pending_question = None
+    st.session_state.is_thinking = False
+    st.rerun()
+
     
 
 # -------------------------------------------------
