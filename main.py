@@ -227,8 +227,6 @@ div[data-testid="stTextInput"] input:focus {
     border: 2px solid var(--accent) !important;
     box-shadow: 0 0 18px var(--accent-soft) !important;
     outline: none !important;
-
-
 }
 input, textarea {
     transition: all 0.15s ease-in-out;
@@ -237,13 +235,6 @@ div[data-testid="stTextInput"] input:not(:placeholder-shown) {
     box-shadow: 0 0 16px var(--accent-soft) !important;
     border: 1.5px solid var(--accent) !important;
 }
-
-
-
-          
-
-
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -286,9 +277,8 @@ if "pending_question" not in st.session_state:
     st.session_state.pending_question = None
 if "is_thinking" not in st.session_state:
     st.session_state.is_thinking = False
-
-   
-
+if "show_input" not in st.session_state:
+    st.session_state.show_input = True
 
 # -------------------------------------------------
 # HASH
@@ -328,38 +318,38 @@ if st.session_state.suggested_questions:
     st.markdown('<div class="suggestion-box">', unsafe_allow_html=True)
     st.markdown("### 💡 Suggested Questions")
 
-    col1, col2 = st.columns(2)  
+    col1, col2 = st.columns(2)
     for i, q in enumerate(st.session_state.suggested_questions):
         with (col1 if i % 2 == 0 else col2):
             if st.button(q, key=f"suggest_{i}"):
+                st.session_state.show_input = True
                 if not st.session_state.chat_history or st.session_state.chat_history[0][1] != q:
                     st.session_state.chat_history.insert(0, ("user", q))
                     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
                     st.session_state.pending_question = q
                     st.session_state.is_thinking = True
-                    st.rerun()
-                    
 
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # USER INPUT (SEND IN SAME ROW)
 # -------------------------------------------------
-# -------------------------------------------------
-# USER INPUT (SEND IN SAME ROW)
-# -------------------------------------------------
-with st.form("question_form", clear_on_submit=True):
-    col1, col2 = st.columns([6, 1])
+if st.session_state.show_input:
+    with st.form("question_form", clear_on_submit=True):
+        col1, col2 = st.columns([6, 1])
 
-    with col1:
-        user_question = st.text_input(
-            "Ask a question about the document",
-            label_visibility="collapsed",
-            key="main_input"
-        )
+        with col1:
+            user_question = st.text_input(
+                "Ask a question about the document",
+                label_visibility="collapsed"
+            )
 
-    with col2:
-        submitted = st.form_submit_button("Send")
+        with col2:
+            submitted = st.form_submit_button("Send")
+
+else:
+    submitted = False
+    user_question = None
 
 if submitted and user_question:
     st.session_state.chat_history.insert(0, ("user", user_question))
@@ -367,41 +357,10 @@ if submitted and user_question:
     st.session_state.pending_question = user_question
     st.session_state.is_thinking = True
 
-    
-
-    
-
 # -------------------------------------------------
 # ANSWER GENERATION
 # -------------------------------------------------
-# -------------------------------------------------
-# ANSWER GENERATION
-# -------------------------------------------------
-if (
-    st.session_state.is_thinking
-    and st.session_state.pending_question
-    and st.session_state.vectordb is not None
-):
-
-    # ✅ ENGAGEMENT OVERLAY (shows during rerun)
-    st.markdown("""
-    <div style="
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.6);
-    backdrop-filter:blur(6px);
-    z-index:9999;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    color:white;
-    font-size:22px;
-    font-weight:700;">
-    🤖 Thinking...<br>
-    <small>Analyzing document</small>
-    </div>
-    """, unsafe_allow_html=True)
-
+if st.session_state.is_thinking and st.session_state.pending_question:
     answer, _ = ask_question(
         st.session_state.pending_question,
         st.session_state.vectordb
@@ -414,12 +373,6 @@ if (
 
     st.session_state.pending_question = None
     st.session_state.is_thinking = False
-
-    st.rerun()  # 🔥 important: removes overlay cleanly
-
-    
-
-    
 
 # -------------------------------------------------
 # CHAT RENDER
