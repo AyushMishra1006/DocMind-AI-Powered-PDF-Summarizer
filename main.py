@@ -292,7 +292,7 @@ if st.session_state.suggested_questions:
                 if not st.session_state.chat_history or st.session_state.chat_history[0][1] != q:
                     st.session_state.chat_history.insert(0, ("user", q))
                     st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
-                st.rerun()
+                
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -314,7 +314,7 @@ with st.form("question_form", clear_on_submit=True):
 if submitted and user_question:
     st.session_state.chat_history.insert(0, ("user", user_question))
     st.session_state.chat_history.insert(1, ("bot", "Generating answer..."))
-    st.rerun()
+    
 
 # -------------------------------------------------
 # ANSWER GENERATION
@@ -332,7 +332,7 @@ if placeholder_index is not None:
             st.session_state.vectordb
         )
     st.session_state.chat_history[placeholder_index] = ("bot", answer)
-    st.rerun()
+    
 
 # -------------------------------------------------
 # CHAT RENDER
