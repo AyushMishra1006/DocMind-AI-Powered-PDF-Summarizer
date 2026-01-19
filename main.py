@@ -348,7 +348,7 @@ if st.session_state.suggested_questions:
             if st.button(q, key=f"suggest_{i}"):
                 st.session_state.show_input = True
                 st.session_state.event_question = q
-
+                st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
@@ -398,7 +398,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 # -------------------------------------------------
 if submitted and user_question:
     st.session_state.event_question = user_question
-
+    st.rerun()
 
 # -------------------------------------------------
 # CENTRALIZED ANSWER GENERATION (SINGLE SOURCE)
@@ -407,10 +407,10 @@ if st.session_state.event_question:
     q = st.session_state.event_question
 
     # insert user message
-    st.session_state.chat_history.insert(0, ("user", q))
+    st.session_state.chat_history.append(("user", q))
 
     # insert thinking message ABOVE it
-    st.session_state.chat_history.insert(0, ("bot", "🤖 Thinking… preparing answer…"))
+    st.session_state.chat_history.append(("bot", "🤖 Thinking… preparing answer…"))
 
     answer, _ = ask_question(q, st.session_state.vectordb)
 
