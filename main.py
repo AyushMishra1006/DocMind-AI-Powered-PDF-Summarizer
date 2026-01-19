@@ -389,24 +389,32 @@ if submitted and user_question:
     
 
 # -------------------------------------------------
-# CENTRALIZED ANSWER GENERATION (SINGLE SOURCE)
+# CENTRALIZED ANSWER GENERATION (FIXED)
 # -------------------------------------------------
-if st.session_state.event_question:
+if st.session_state.event_question and not st.session_state.is_thinking:
+    st.session_state.is_thinking = True
+
     q = st.session_state.event_question
 
-    # insert user message
+    # add user message
     st.session_state.chat_history.append(("user", q))
 
-    # insert thinking message ABOVE it
+    # add thinking placeholder
+    thinking_index = len(st.session_state.chat_history)
     st.session_state.chat_history.append(("bot", "🤖 Thinking… preparing answer…"))
 
+    # generate answer
     answer, _ = ask_question(q, st.session_state.vectordb)
 
-    # replace the thinking message (index 0)
-    st.session_state.chat_history[0] = ("bot", answer)
+    # replace thinking message (CORRECT INDEX)
+    st.session_state.chat_history[thinking_index] = ("bot", answer)
 
-
+    # reset flags
     st.session_state.event_question = None
+    st.session_state.is_thinking = False
+
+    st.rerun()
+
 # -------------------------------------------------
 # CHAT RENDER
 # -------------------------------------------------
