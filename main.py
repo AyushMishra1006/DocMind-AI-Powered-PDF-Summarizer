@@ -73,15 +73,30 @@ if not st.session_state.app_loaded:
 st.markdown("""
 <style>
 :root {
-    --accent: #a020f0;
-    --accent-soft: rgba(160,32,240,0.35);
+:root {
+    --accent: #b84dff;
+    --accent-strong: #9b2cff;
+    --accent-dark: #5a189a;
+
+    --accent-gradient: linear-gradient(
+        135deg,
+        #3a0ca3,
+        #7209b7,
+        #b5179e,
+        #f72585
+    );
+
+    --accent-soft: rgba(184,77,255,0.35);
+    --accent-glow: 0 0 25px rgba(184,77,255,0.6);
+
     --bg-main: #000000;
-    --bg-soft: #0f0f0f;
-    --bg-widget: #121212;
-    --border-soft: rgba(255,255,255,0.15);
+    --bg-soft: #0b0614;
+    --bg-widget: #12081f;
+    --border-soft: rgba(255,255,255,0.12);
     --text-main: #ffffff;
     --text-muted: #cccccc;
 }
+
 
 .stApp {
     background-color: black !important;
@@ -146,17 +161,20 @@ button {
 }
 
 .main-title {
-    background: #0f0f0f !important;
-    border: 1px solid var(--accent);
-    box-shadow: 0 0 18px var(--accent-soft);
-    border-radius: 14px;
-    padding: 14px;
+    background: var(--accent-gradient);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    box-shadow: 0 0 35px rgba(183,23,158,0.55);
+    border-radius: 16px;
+    padding: 18px;
     font-size: 42px;
-    font-weight: 800;
+    font-weight: 900;
     text-align: center;
     margin-bottom: 24px;
-    animation: waveIn 0.9s ease-out forwards;
+    color: white;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px rgba(255,255,255,0.25);
 }
+
 
 div[data-testid="stForm"] {
     animation: waveIn 1.2s ease-out forwards;
@@ -213,21 +231,22 @@ div[data-testid="stForm"] {
 ============================= */
 button:hover,
 div[data-testid="stButton"] > button:hover {
-    background: var(--accent) !important;
-    color: black !important;
-    box-shadow: 0 0 16px var(--accent) !important;
-    transform: scale(1.04);
+    background: var(--accent-gradient) !important;
+    color: white !important;
+    box-shadow: var(--accent-glow) !important;
+    transform: scale(1.05);
     transition: all 0.15s ease-in-out;
 }
-            
+        
 /* ============================
    SEARCH BOX PURPLE FOCUS
 ============================= */
 div[data-testid="stTextInput"] input:focus {
     border: 2px solid var(--accent) !important;
-    box-shadow: 0 0 18px var(--accent-soft) !important;
+    box-shadow: 0 0 25px rgba(183,23,158,0.6) !important;
     outline: none !important;
 }
+
 input, textarea {
     transition: all 0.15s ease-in-out;
 }
@@ -257,6 +276,14 @@ div[data-testid="stTextInput"] input:not(:placeholder-shown) {
 footer {
     display: none;
 }
+.suggestion-box,
+.user-msg,
+.bot-msg {
+    border-width: 2px;
+    border-style: solid;
+    border-image: var(--accent-gradient) 1;
+}
+
 
 </style>
 """, unsafe_allow_html=True)
