@@ -22,7 +22,9 @@ def is_text_good(text):
 # -------------------------
 def upload_and_extract_file():
     uploaded_file = st.sidebar.file_uploader(
-        type=["pdf", "png", "jpg", "jpeg"]
+        "",
+        type=["pdf", "png", "jpg", "jpeg"],
+        label_visibility="collapsed"
     )
 
     if uploaded_file is None:
