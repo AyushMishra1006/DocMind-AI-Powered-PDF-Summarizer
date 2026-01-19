@@ -348,22 +348,10 @@ if st.session_state.suggested_questions:
             if st.button(q, key=f"suggest_{i}"):
                 st.session_state.show_input = True
                 st.session_state.event_question = q
-                st.rerun()
+                
     st.markdown("</div>", unsafe_allow_html=True)
 
-# -------------------------------------------------
-# CHAT RENDER
-# -------------------------------------------------
-st.markdown('<div class="chat-container">', unsafe_allow_html=True)
 
-if document_text:
-    for role, msg in st.session_state.chat_history:
-        css = "user-msg" if role == "user" else "bot-msg"
-        st.markdown(f'<div class="{css}">{msg}</div>', unsafe_allow_html=True)
-else:
-    st.info("📄 Upload a document to get started")
-
-st.markdown("</div>", unsafe_allow_html=True)
 
 
 
@@ -398,7 +386,7 @@ st.markdown("</div>", unsafe_allow_html=True)
 # -------------------------------------------------
 if submitted and user_question:
     st.session_state.event_question = user_question
-    st.rerun()
+    
 
 # -------------------------------------------------
 # CENTRALIZED ANSWER GENERATION (SINGLE SOURCE)
@@ -419,6 +407,19 @@ if st.session_state.event_question:
 
 
     st.session_state.event_question = None
+# -------------------------------------------------
+# CHAT RENDER
+# -------------------------------------------------
+st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+
+if document_text:
+    for role, msg in st.session_state.chat_history:
+        css = "user-msg" if role == "user" else "bot-msg"
+        st.markdown(f'<div class="{css}">{msg}</div>', unsafe_allow_html=True)
+else:
+    st.info("📄 Upload a document to get started")
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # MARK APP AS LOADED
