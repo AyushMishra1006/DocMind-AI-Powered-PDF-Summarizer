@@ -296,12 +296,13 @@ if "doc_hash" not in st.session_state:
     st.session_state.doc_hash = None
 if "suggested_questions" not in st.session_state:
     st.session_state.suggested_questions = []
-if "pending_question" not in st.session_state:
-    st.session_state.pending_question = None
+if "event_question" not in st.session_state:
+    st.session_state.event_question = None
 if "is_thinking" not in st.session_state:
     st.session_state.is_thinking = False
 if "show_input" not in st.session_state:
     st.session_state.show_input = True
+
 
 # -------------------------------------------------
 # HASH
@@ -346,12 +347,7 @@ if st.session_state.suggested_questions:
         with (col1 if i % 2 == 0 else col2):
             if st.button(q, key=f"suggest_{i}"):
                 st.session_state.show_input = True
-                if not st.session_state.chat_history or st.session_state.chat_history[0][1] != q:
-                    st.session_state.chat_history.insert(0, ("user", q))
-                    st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
-                    st.session_state.pending_question = q
-                    st.session_state.is_thinking = True
-                    st.rerun()
+                st.session_state.event_question = q
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -397,30 +393,28 @@ st.markdown("</div>", unsafe_allow_html=True)
 # SUBMIT HANDLER
 # -------------------------------------------------
 if submitted and user_question:
-    st.session_state.chat_history.insert(0, ("user", user_question))
-    st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
-    st.session_state.pending_question = user_question
-    st.session_state.is_thinking = True
+    st.session_state.event_question = user_question
 
 
 # -------------------------------------------------
-# ANSWER GENERATION
+# CENTRALIZED ANSWER GENERATION (SINGLE SOURCE)
 # -------------------------------------------------
-if st.session_state.is_thinking and st.session_state.pending_question:
-    answer, _ = ask_question(
-        st.session_state.pending_question,
-        st.session_state.vectordb
-    )
+if st.session_state.event_question:
+    q = st.session_state.event_question
 
-    for i, (r, t) in enumerate(st.session_state.chat_history):
-        if r == "bot" and "Thinking…" in t:
-            st.session_state.chat_history[i] = ("bot", answer)
-            break
+    # insert user message
+    st.session_state.chat_history.insert(0, ("user", q))
 
-    st.session_state.pending_question = None
-    st.session_state.is_thinking = False
+    # insert thinking message ABOVE it
+    st.session_state.chat_history.insert(0, ("bot", "🤖 Thinking… preparing answer…"))
+
+    answer, _ = ask_question(q, st.session_state.vectordb)
+
+    # replace the thinking message (index 0)
+    st.session_state.chat_history[0] = ("bot", answer)
 
 
+    st.session_state.event_question = None
 
 # -------------------------------------------------
 # MARK APP AS LOADED
