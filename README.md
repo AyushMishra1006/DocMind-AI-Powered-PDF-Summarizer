@@ -1,10 +1,3 @@
-Alright bhai 😄 now this makes sense.
-Here’s a **professional, industry-grade GitHub README** for **DocMind** — written like a real product, not a college project.
-
-You can copy–paste this directly into `README.md`.
-
----
-
 # 🤖 DocMind – AI-Powered Document Intelligence Assistant
 
 DocMind is a production-ready **AI document intelligence system** that allows users to upload PDFs or images and interact with them through natural language.
@@ -210,15 +203,4 @@ Built with ❤️ and too much coffee ☕
 
 Give it a star ⭐ — it helps a lot!
 
----
 
-If you want, I can also:
-
-* write **resume bullet points**
-* make **README more startup-style**
-* add **badges**
-* write **demo section**
-* add **screenshots section**
-* make it **open-source ready**
-
-Just say the word, bhai 🚀
