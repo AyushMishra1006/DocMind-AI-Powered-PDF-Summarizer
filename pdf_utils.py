@@ -22,7 +22,6 @@ def is_text_good(text):
 # -------------------------
 def upload_and_extract_file():
     uploaded_file = st.sidebar.file_uploader(
-        "Upload a document",
         type=["pdf", "png", "jpg", "jpeg"]
     )
 
