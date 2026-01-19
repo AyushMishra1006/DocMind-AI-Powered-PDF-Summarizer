@@ -352,28 +352,7 @@ if st.session_state.suggested_questions:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-# -------------------------------------------------
-# FIXED INPUT BAR (CHATGPT STYLE)
-# -------------------------------------------------
-st.markdown('<div class="input-bar">', unsafe_allow_html=True)
 
-if st.session_state.show_input:
-    with st.form("question_form", clear_on_submit=True):
-        col1, col2 = st.columns([6, 1])
-
-        with col1:
-            user_question = st.text_input(
-                "Ask a question about the document",
-                label_visibility="collapsed"
-            )
-
-        with col2:
-            submitted = st.form_submit_button("Send")
-else:
-    submitted = False
-    user_question = None
-
-st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------
 # SUBMIT HANDLER
@@ -412,6 +391,28 @@ if document_text:
         st.markdown(f'<div class="{css}">{msg}</div>', unsafe_allow_html=True)
 else:
     st.info("📄 Upload a document to get started")
+
+st.markdown("</div>", unsafe_allow_html=True)
+# -------------------------------------------------
+# FIXED INPUT BAR (CHATGPT STYLE)
+# -------------------------------------------------
+st.markdown('<div class="input-bar">', unsafe_allow_html=True)
+
+if st.session_state.show_input:
+    with st.form("question_form", clear_on_submit=True):
+        col1, col2 = st.columns([6, 1])
+
+        with col1:
+            user_question = st.text_input(
+                "Ask a question about the document",
+                label_visibility="collapsed"
+            )
+
+        with col2:
+            submitted = st.form_submit_button("Send")
+else:
+    submitted = False
+    user_question = None
 
 st.markdown("</div>", unsafe_allow_html=True)
 # -------------------------------------------------
