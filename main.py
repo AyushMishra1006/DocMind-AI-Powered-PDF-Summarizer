@@ -73,7 +73,6 @@ if not st.session_state.app_loaded:
 st.markdown("""
 <style>
 :root {
-:root {
     --accent: #b84dff;
     --accent-strong: #9b2cff;
     --accent-dark: #5a189a;
@@ -96,7 +95,6 @@ st.markdown("""
     --text-main: #ffffff;
     --text-muted: #cccccc;
 }
-
 
 .stApp {
     background-color: black !important;
@@ -139,42 +137,63 @@ section[data-testid="stSidebar"] {
     border-radius: 999px !important;
 }
 
-input, textarea {
-    background-color: var(--bg-widget) !important;
-    color: var(--text-main) !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--border-soft) !important;
+/* ============================
+   SEARCH BOX (FILLED GRADIENT)
+============================= */
+div[data-testid="stTextInput"] input {
+    background: linear-gradient(135deg, #1a002b, #2a004f) !important;
+    color: white !important;
+    border-radius: 14px !important;
+    border: 1.5px solid transparent !important;
+    padding: 12px 14px !important;
+    background-clip: padding-box;
+    box-shadow: 0 0 18px rgba(183,23,158,0.45) !important;
+    transition: all 0.15s ease-in-out;
 }
 
-button {
-    background-color: var(--bg-widget) !important;
-    color: var(--text-main) !important;
-    border: 1px solid var(--accent) !important;
-    border-radius: 999px !important;
-    padding: 10px 18px !important;
-    font-weight: 600;
+div[data-testid="stTextInput"] input::placeholder {
+    color: rgba(255,255,255,0.65) !important;
+}
+
+div[data-testid="stTextInput"] input:focus {
+    background: linear-gradient(135deg, #2a004f, #3a006f) !important;
+    border: 1.5px solid var(--accent) !important;
+    box-shadow: 0 0 30px rgba(183,23,158,0.8) !important;
+    outline: none !important;
+}
+
+/* ============================
+   TITLE (FILLED + SMOOTH)
+============================= */
+.main-title {
+    background: linear-gradient(
+        135deg,
+        rgba(114,9,183,0.95),
+        rgba(181,23,158,0.95),
+        rgba(247,37,133,0.95)
+    );
+    border-radius: 18px;
+    padding: 20px;
+    font-size: 42px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 24px;
+
+    color: white;
+    letter-spacing: 1px;
+    text-shadow: 0 0 14px rgba(255,255,255,0.35);
+
+    box-shadow:
+        0 0 35px rgba(183,23,158,0.6),
+        inset 0 0 25px rgba(255,255,255,0.15);
+
+    border: 1.5px solid rgba(255,255,255,0.25);
 }
 
 @keyframes waveIn {
     0% { opacity: 0; transform: translateY(30px); }
     100% { opacity: 1; transform: translateY(0); }
 }
-
-.main-title {
-    background: var(--accent-gradient);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    box-shadow: 0 0 35px rgba(183,23,158,0.55);
-    border-radius: 16px;
-    padding: 18px;
-    font-size: 42px;
-    font-weight: 900;
-    text-align: center;
-    margin-bottom: 24px;
-    color: white;
-    letter-spacing: 1px;
-    text-shadow: 0 0 12px rgba(255,255,255,0.25);
-}
-
 
 div[data-testid="stForm"] {
     animation: waveIn 1.2s ease-out forwards;
@@ -203,7 +222,6 @@ div[data-testid="stForm"] {
 
 .user-msg {
     background: #181818;
-    border-left: 4px solid var(--accent);
     padding: 12px 16px;
     border-radius: 14px;
     max-width: 75%;
@@ -212,23 +230,21 @@ div[data-testid="stForm"] {
 
 .bot-msg {
     background: #101010;
-    border-right: 4px solid var(--accent);
     padding: 14px 18px;
     border-radius: 14px;
     max-width: 75%;
     margin-bottom: 8px;
 }
 
-.footer {
-    text-align: center;
-    color: #bbbbbb;
-    font-weight: 600;
-    margin-top: 30px;
-    padding: 15px;
+.suggestion-box,
+.user-msg,
+.bot-msg {
+    border-width: 2px;
+    border-style: solid;
+    border-image: var(--accent-gradient) 1;
 }
-/* ============================
-   BUTTON HOVER EFFECT (PURPLE)
-============================= */
+
+/* BUTTON HOVER */
 button:hover,
 div[data-testid="stButton"] > button:hover {
     background: var(--accent-gradient) !important;
@@ -237,30 +253,13 @@ div[data-testid="stButton"] > button:hover {
     transform: scale(1.05);
     transition: all 0.15s ease-in-out;
 }
-        
-/* ============================
-   SEARCH BOX PURPLE FOCUS
-============================= */
-div[data-testid="stTextInput"] input:focus {
-    border: 2px solid var(--accent) !important;
-    box-shadow: 0 0 25px rgba(183,23,158,0.6) !important;
-    outline: none !important;
-}
 
-input, textarea {
-    transition: all 0.15s ease-in-out;
-}
-div[data-testid="stTextInput"] input:not(:placeholder-shown) {
-    box-shadow: 0 0 16px var(--accent-soft) !important;
-    border: 1.5px solid var(--accent) !important;
-}
 .chat-container {
     max-height: calc(100vh - 180px);
     overflow-y: auto;
     padding-bottom: 120px;
 }
 
-/* sticky input bar */
 .input-bar {
     position: fixed;
     bottom: 0;
@@ -272,21 +271,12 @@ div[data-testid="stTextInput"] input:not(:placeholder-shown) {
     z-index: 999;
 }
 
-/* prevent footer overlap */
 footer {
     display: none;
 }
-.suggestion-box,
-.user-msg,
-.bot-msg {
-    border-width: 2px;
-    border-style: solid;
-    border-image: var(--accent-gradient) 1;
-}
-
-
 </style>
 """, unsafe_allow_html=True)
+
 
 # -------------------------------------------------
 # SIDEBAR
