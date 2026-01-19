@@ -351,6 +351,7 @@ if st.session_state.suggested_questions:
                     st.session_state.chat_history.insert(1, ("bot", "🤖 Thinking… preparing answer…"))
                     st.session_state.pending_question = q
                     st.session_state.is_thinking = True
+                    st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
 
