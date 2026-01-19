@@ -166,29 +166,43 @@ div[data-testid="stTextInput"] input:focus {
    TITLE (FILLED + SMOOTH)
 ============================= */
 .main-title {
+    position: relative;
     background: linear-gradient(
         135deg,
-        rgba(58,12,163,0.85),
-        rgba(114,9,183,0.85),
-        rgba(181,23,158,0.85)
+        rgba(58,12,163,0.75),
+        rgba(114,9,183,0.75),
+        rgba(181,23,158,0.75)
     );
-    border-radius: 16px;
-    padding: 18px;
+    border-radius: 18px;
+    padding: 20px;
     font-size: 40px;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 30px;
 
     color: #f5e9ff;
     letter-spacing: 0.5px;
     text-shadow: 0 0 6px rgba(184,77,255,0.35);
 
+    border: 1px solid rgba(255,255,255,0.18);
     box-shadow:
         0 0 18px rgba(114,9,183,0.35),
         inset 0 0 18px rgba(255,255,255,0.08);
-
-    border: 1px solid rgba(255,255,255,0.18);
 }
+.main-title::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: radial-gradient(
+        circle,
+        rgba(114,9,183,0.25),
+        transparent 70%
+    );
+    filter: blur(30px);
+    z-index: -1;
+}
+
+
 
 
 @keyframes waveIn {
