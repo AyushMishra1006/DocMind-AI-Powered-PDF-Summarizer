@@ -167,11 +167,13 @@ div[data-testid="stTextInput"] input:focus {
 ============================= */
 .main-title {
     position: relative;
+    overflow: visible;
+
     background: linear-gradient(
         135deg,
-        rgba(58,12,163,0.75),
-        rgba(114,9,183,0.75),
-        rgba(181,23,158,0.75)
+        rgba(40,8,120,0.82),
+        rgba(70,12,150,0.82),
+        rgba(120,20,140,0.82)
     );
     border-radius: 18px;
     padding: 20px;
@@ -180,15 +182,16 @@ div[data-testid="stTextInput"] input:focus {
     text-align: center;
     margin-bottom: 30px;
 
-    color: #f5e9ff;
-    letter-spacing: 0.5px;
-    text-shadow: 0 0 6px rgba(184,77,255,0.35);
+    color: #f1e6ff;
+    letter-spacing: 0.4px;
+    text-shadow: 0 0 5px rgba(184,77,255,0.25);
 
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.15);
     box-shadow:
-        0 0 18px rgba(114,9,183,0.35),
-        inset 0 0 18px rgba(255,255,255,0.08);
+        0 0 14px rgba(114,9,183,0.30),
+        inset 0 0 16px rgba(255,255,255,0.06);
 }
+
 .main-title::before {
     content: "";
     position: absolute;
