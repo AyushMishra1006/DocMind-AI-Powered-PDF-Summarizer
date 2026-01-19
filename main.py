@@ -168,27 +168,28 @@ div[data-testid="stTextInput"] input:focus {
 .main-title {
     background: linear-gradient(
         135deg,
-        rgba(114,9,183,0.95),
-        rgba(181,23,158,0.95),
-        rgba(247,37,133,0.95)
+        rgba(58,12,163,0.85),
+        rgba(114,9,183,0.85),
+        rgba(181,23,158,0.85)
     );
-    border-radius: 18px;
-    padding: 20px;
-    font-size: 42px;
-    font-weight: 900;
+    border-radius: 16px;
+    padding: 18px;
+    font-size: 40px;
+    font-weight: 800;
     text-align: center;
     margin-bottom: 24px;
 
-    color: white;
-    letter-spacing: 1px;
-    text-shadow: 0 0 14px rgba(255,255,255,0.35);
+    color: #f5e9ff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 6px rgba(184,77,255,0.35);
 
     box-shadow:
-        0 0 35px rgba(183,23,158,0.6),
-        inset 0 0 25px rgba(255,255,255,0.15);
+        0 0 18px rgba(114,9,183,0.35),
+        inset 0 0 18px rgba(255,255,255,0.08);
 
-    border: 1.5px solid rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.18);
 }
+
 
 @keyframes waveIn {
     0% { opacity: 0; transform: translateY(30px); }
