@@ -9,7 +9,9 @@ Built with **Streamlit + Gemini + LangChain**, DocMind is designed to be fast, a
 <img width="1433" height="800" alt="image" src="https://github.com/user-attachments/assets/4f5fed91-129a-410e-8e5d-6fc7915252b4" />
 
 
-<img width="1435" height="829" alt="image" src="https://github.com/user-attachments/assets/e58d3d28-3588-4743-9001-dcc094564b29" />
+
+<img width="1432" height="797" alt="image" src="https://github.com/user-attachments/assets/e5a3a6a3-0949-409a-84fd-9f1403581972" />
+
 
 
 ---
