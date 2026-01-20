@@ -170,40 +170,40 @@ div[data-testid="stTextInput"] input:focus {
     overflow: visible;
 
     background: linear-gradient(
-        135deg,
-        #140a26,
-        #1a0d33
+        180deg,
+        #0f0820,
+        #160b2b
     );
     border-radius: 16px;
-    padding: 18px 20px;
+    padding: 20px 22px;
     font-size: 38px;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 26px;
+    margin-bottom: 30px;
 
-    color: #f3eaff;
-    letter-spacing: 0.4px;
+    color: #f6efff;
+    letter-spacing: 0.5px;
 
-    border: 1px solid rgba(184,77,255,0.35);
+    border: 1px solid rgba(184,77,255,0.45);
+
     box-shadow:
-        0 0 0 1px rgba(184,77,255,0.12),
-        0 12px 35px rgba(0,0,0,0.6),
-        inset 0 1px 0 rgba(255,255,255,0.04);
+        0 14px 40px rgba(0,0,0,0.75),
+        inset 0 1px 0 rgba(255,255,255,0.05);
 }
-
 
 .main-title::before {
     content: "";
     position: absolute;
-    inset: -20px;
+    inset: -24px;
     background: radial-gradient(
         circle,
-        rgba(114,9,183,0.25),
-        transparent 70%
+        rgba(184,77,255,0.18),
+        transparent 65%
     );
-    filter: blur(30px);
+    filter: blur(35px);
     z-index: -1;
 }
+
 
 
 
