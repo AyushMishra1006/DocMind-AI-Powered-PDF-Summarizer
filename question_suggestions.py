@@ -21,6 +21,8 @@ Rules:
 - Return only short, clear questions.
 - Avoid yes/no questions.
 - Focus on summaries, key points, entities, dates, and structure.
+- Avoid long or compound sentences.
+- Be concise but meaningful.
 
 DOCUMENT TEXT:
 \"\"\"{document_text[:3000]}\"\"\"
