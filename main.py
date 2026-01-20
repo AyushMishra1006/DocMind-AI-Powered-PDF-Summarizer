@@ -171,8 +171,8 @@ div[data-testid="stTextInput"] input:focus {
 
     background: linear-gradient(
         180deg,
-        #0f0820,
-        #160b2b
+        #1c0f3a,
+        #2a1554
     );
     border-radius: 16px;
     padding: 20px 22px;
@@ -181,28 +181,33 @@ div[data-testid="stTextInput"] input:focus {
     text-align: center;
     margin-bottom: 30px;
 
-    color: #f6efff;
-    letter-spacing: 0.5px;
+    color: #ffffff;
+    letter-spacing: 0.6px;
+    text-shadow:
+        0 0 6px rgba(184,77,255,0.45),
+        0 0 14px rgba(184,77,255,0.25);
 
-    border: 1px solid rgba(184,77,255,0.45);
+    border: 1px solid rgba(184,77,255,0.65);
 
     box-shadow:
-        0 14px 40px rgba(0,0,0,0.75),
-        inset 0 1px 0 rgba(255,255,255,0.05);
+        0 0 0 1px rgba(184,77,255,0.25),
+        0 16px 45px rgba(0,0,0,0.7),
+        inset 0 0 24px rgba(255,255,255,0.08);
 }
-
 .main-title::before {
     content: "";
     position: absolute;
-    inset: -24px;
+    inset: -30px;
     background: radial-gradient(
         circle,
-        rgba(184,77,255,0.18),
-        transparent 65%
+        rgba(184,77,255,0.45),
+        rgba(184,77,255,0.2),
+        transparent 70%
     );
-    filter: blur(35px);
+    filter: blur(45px);
     z-index: -1;
 }
+
 
 
 
