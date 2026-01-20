@@ -170,27 +170,26 @@ div[data-testid="stTextInput"] input:focus {
     overflow: visible;
 
     background: linear-gradient(
-        135deg,
-        rgba(40,8,120,0.82),
-        rgba(70,12,150,0.82),
-        rgba(120,20,140,0.82)
+        180deg,
+        rgba(28, 16, 52, 0.95),
+        rgba(20, 12, 36, 0.95)
     );
-    border-radius: 18px;
-    padding: 20px;
-    font-size: 40px;
-    font-weight: 800;
+    border-radius: 16px;
+    padding: 18px;
+    font-size: 38px;
+    font-weight: 700;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 
-    color: #f1e6ff;
-    letter-spacing: 0.4px;
-    text-shadow: 0 0 5px rgba(184,77,255,0.25);
+    color: #e8dcff;
+    letter-spacing: 0.3px;
 
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(184,77,255,0.25);
     box-shadow:
-        0 0 14px rgba(114,9,183,0.30),
-        inset 0 0 16px rgba(255,255,255,0.06);
+        0 8px 30px rgba(0,0,0,0.6),
+        inset 0 1px 0 rgba(255,255,255,0.05);
 }
+
 
 .main-title::before {
     content: "";
