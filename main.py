@@ -163,11 +163,12 @@ div[data-testid="stTextInput"] input:focus {
 }
 
 /* ============================
-   TITLE (FILLED + SMOOTH)
+   TITLE (FILLED + NEON SMOOTH)
 ============================= */
 .main-title {
     position: relative;
     overflow: visible;
+    isolation: isolate;
 
     background: linear-gradient(
         180deg,
@@ -195,23 +196,20 @@ div[data-testid="stTextInput"] input:focus {
         inset 0 0 24px rgba(255,255,255,0.08);
 }
 
+/* background light aura */
 .main-title::before {
     content: "";
     position: absolute;
-    inset: -30px;
+    inset: -40px;
     background: radial-gradient(
         circle,
-        rgba(184,77,255,0.45),
-        rgba(184,77,255,0.2),
+        rgba(184,77,255,0.5),
+        rgba(184,77,255,0.25),
         transparent 70%
     );
-    filter: blur(45px);
+    filter: blur(55px);
     z-index: -1;
 }
-
-
-
-
 
 
 @keyframes waveIn {
