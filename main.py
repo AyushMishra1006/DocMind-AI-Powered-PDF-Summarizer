@@ -163,13 +163,9 @@ div[data-testid="stTextInput"] input:focus {
 }
 
 /* ============================
-   TITLE (FILLED + NEON SMOOTH)
+   TITLE (NEON + ALWAYS VISIBLE)
 ============================= */
 .main-title {
-    position: relative;
-    overflow: visible;
-    isolation: isolate;
-
     background: linear-gradient(
         180deg,
         #1c0f3a,
@@ -191,24 +187,15 @@ div[data-testid="stTextInput"] input:focus {
     border: 1px solid rgba(184,77,255,0.65);
 
     box-shadow:
-        0 0 0 1px rgba(184,77,255,0.25),
-        0 16px 45px rgba(0,0,0,0.7),
-        inset 0 0 24px rgba(255,255,255,0.08);
-}
+        /* neon outer glow */
+        0 0 30px rgba(184,77,255,0.45),
+        0 0 60px rgba(184,77,255,0.25),
 
-/* background light aura */
-.main-title::before {
-    content: "";
-    position: absolute;
-    inset: -40px;
-    background: radial-gradient(
-        circle,
-        rgba(184,77,255,0.5),
-        rgba(184,77,255,0.25),
-        transparent 70%
-    );
-    filter: blur(55px);
-    z-index: -1;
+        /* depth shadow */
+        0 16px 45px rgba(0,0,0,0.7),
+
+        /* inner light */
+        inset 0 0 24px rgba(255,255,255,0.08);
 }
 
 
