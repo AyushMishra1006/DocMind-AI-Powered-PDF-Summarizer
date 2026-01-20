@@ -292,6 +292,48 @@ div[data-testid="stButton"] > button:hover {
 footer {
     display: none;
 }
+            /* =========================================================
+   FORCE DARK MODE (PREVENT LIGHT THEME OVERRIDE)
+========================================================= */
+html, body, .stApp {
+    color-scheme: dark !important;
+}
+
+/* Fix SEND button turning white in light mode */
+button,
+div[data-testid="stButton"] > button {
+    background: #121212 !important;
+    color: #ffffff !important;
+    border: 1px solid var(--accent) !important;
+}
+
+/* Fix suggestion buttons / suggestion boxes */
+.suggestion-box,
+.suggestion-box * {
+    background: #0f0f0f !important;
+    color: #ffffff !important;
+}
+
+/* Fix Streamlit auto light-mode inputs */
+input, textarea {
+    background-color: #121212 !important;
+    color: #ffffff !important;
+}
+
+/* Fix hover still staying dark */
+button:hover,
+div[data-testid="stButton"] > button:hover {
+    background: var(--accent-gradient) !important;
+    color: white !important;
+}
+
+/* Prevent browser forced light styles */
+@media (prefers-color-scheme: light) {
+    * {
+        color-scheme: dark !important;
+    }
+}
+
 </style>
 """, unsafe_allow_html=True)
 
