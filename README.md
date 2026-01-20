@@ -5,6 +5,10 @@ It combines **OCR, semantic search, and Gemini LLM reasoning** to deliver clean,
 
 Built with **Streamlit + Gemini + LangChain**, DocMind is designed to be fast, accurate, and cloud-safe.
 
+
+<img width="1437" height="814" alt="image" src="https://github.com/user-attachments/assets/0dd2fc61-bd1a-4ca6-916e-bb59938e2f89" />
+
+
 ---
 
 ## ✨ Key Features
