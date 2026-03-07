@@ -41,3 +41,7 @@ def clear_old_embeddings(persist_directory=None):
     """No-op function to avoid filesystem writes."""
     pass
 
+
+#
+
+
