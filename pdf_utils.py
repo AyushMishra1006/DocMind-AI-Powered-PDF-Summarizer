@@ -54,3 +54,5 @@ def upload_and_extract_file():
         return ocr_pdf_bytes(pdf_bytes)
 
     return native_text.strip()
+
+#
